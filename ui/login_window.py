@@ -15,107 +15,156 @@ class LoginWindow(QMainWindow):
         self.initUI()
         
     def initUI(self):
-        # Ana pencere ayarları
-        self.setWindowTitle("Diyabet Takip Sistemi - Giriş")
+        # Main window settings
+        self.setWindowTitle("Diyabet Takip Sistemi")
         self.setMinimumSize(800, 600)
         self.setWindowIcon(QIcon("resources/icons/app_icon.png"))
         
-        # Ana widget
+        # Main widget
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
-        # Ana layout
+        # Main layout
         main_layout = QHBoxLayout()
         central_widget.setLayout(main_layout)
         
-        # Sol panel (görsel ve logo)
+        # Left panel (visual and logo)
         left_panel = QFrame()
-        left_panel.setStyleSheet("background-color: #3498db;")
+        left_panel.setStyleSheet("""
+            background-color: #3949AB;
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        """)
         left_panel.setMinimumWidth(300)
         
         left_layout = QVBoxLayout()
         left_panel.setLayout(left_layout)
         
-        # Logo ve uygulama adı
+        # Logo and app name
         logo_label = QLabel()
         logo_pixmap = QPixmap("resources/icons/logo.png")
-        logo_label.setPixmap(logo_pixmap.scaled(200, 200, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        logo_label.setPixmap(logo_pixmap.scaled(180, 180, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         logo_label.setAlignment(Qt.AlignCenter)
         
         app_name = QLabel("Diyabet Takip Sistemi")
-        app_name.setFont(QFont("Arial", 18, QFont.Bold))
+        app_name.setFont(QFont("Segoe UI", 18, QFont.Bold))
         app_name.setStyleSheet("color: white;")
         app_name.setAlignment(Qt.AlignCenter)
+        
+        app_subtitle = QLabel("Sağlıklı bir yaşam için kan şekeri takibi")
+        app_subtitle.setFont(QFont("Segoe UI", 12))
+        app_subtitle.setStyleSheet("color: rgba(255, 255, 255, 0.8);")
+        app_subtitle.setAlignment(Qt.AlignCenter)
         
         left_layout.addStretch(1)
         left_layout.addWidget(logo_label)
         left_layout.addWidget(app_name)
+        left_layout.addWidget(app_subtitle)
         left_layout.addStretch(2)
         
-        # Sağ panel (giriş formu)
+        # Right panel (login form)
         right_panel = QFrame()
-        right_panel.setStyleSheet("background-color: white;")
+        right_panel.setStyleSheet("""
+            background-color: white;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        """)
         
         right_layout = QVBoxLayout()
         right_panel.setLayout(right_layout)
         
-        # Giriş formu
+        # Login form
         login_form = QWidget()
         form_layout = QFormLayout()
         login_form.setLayout(form_layout)
         
-        # Giriş alanları
+        # Form title
+        login_title = QLabel("Kullanıcı Girişi")
+        login_title.setFont(QFont("Segoe UI", 20, QFont.Bold))
+        login_title.setStyleSheet("color: #333333; margin-bottom: 20px;")
+        login_title.setAlignment(Qt.AlignCenter)
+        
+        # Login fields
         self.tc_input = QLineEdit()
         self.tc_input.setPlaceholderText("TC Kimlik Numarası")
         self.tc_input.setMaxLength(11)
-        self.tc_input.setMinimumHeight(40)
+        self.tc_input.setMinimumHeight(45)
+        self.tc_input.setStyleSheet("""
+            QLineEdit {
+                border: 1px solid #E0E0E0;
+                border-radius: 5px;
+                padding: 10px;
+                font-size: 14px;
+                background-color: #F5F5F5;
+            }
+            QLineEdit:focus {
+                border: 1px solid #3949AB;
+                background-color: white;
+            }
+        """)
         
         self.password_input = QLineEdit()
         self.password_input.setPlaceholderText("Şifre")
         self.password_input.setEchoMode(QLineEdit.Password)
-        self.password_input.setMinimumHeight(40)
+        self.password_input.setMinimumHeight(45)
+        self.password_input.setStyleSheet("""
+            QLineEdit {
+                border: 1px solid #E0E0E0;
+                border-radius: 5px;
+                padding: 10px;
+                font-size: 14px;
+                background-color: #F5F5F5;
+            }
+            QLineEdit:focus {
+                border: 1px solid #3949AB;
+                background-color: white;
+            }
+        """)
         
         form_layout.addRow("TC Kimlik:", self.tc_input)
         form_layout.addRow("Şifre:", self.password_input)
         
-        # Giriş butonu
+        # Login button
         self.login_button = QPushButton("Giriş Yap")
         self.login_button.setMinimumHeight(50)
         self.login_button.setStyleSheet("""
             QPushButton {
-                background-color: #3498db;
+                background-color: #3949AB;
                 color: white;
                 border-radius: 5px;
                 font-weight: bold;
                 font-size: 14px;
+                padding: 8px 15px;
             }
             QPushButton:hover {
-                background-color: #2980b9;
+                background-color: #303F9F;
+            }
+            QPushButton:pressed {
+                background-color: #1A237E;
             }
         """)
         
         self.login_button.clicked.connect(self.handle_login)
         
-        # Enter tuşuna basılınca giriş yap
+        # Enter key press to login
         self.tc_input.returnPressed.connect(self.handle_login)
         self.password_input.returnPressed.connect(self.handle_login)
         
-        # Sağ panele form ekle
+        # Add form to right panel
         right_layout.addStretch(1)
-        right_layout.addWidget(QLabel("<h2>Kullanıcı Girişi</h2>"))
+        right_layout.addWidget(login_title)
         right_layout.addWidget(login_form)
         right_layout.addWidget(self.login_button)
         right_layout.addStretch(2)
         
-        # Ana layout'a panelleri ekle
+        # Add panels to main layout
         main_layout.addWidget(left_panel)
         main_layout.addWidget(right_panel)
         
-        # Pencereyi ekranın ortasına yerleştir
+        # Position window in center of screen
         self.center()
     
     def center(self):
-        """Pencereyi ekranın ortasına yerleştirir."""
         screen = self.screen().availableGeometry()
         window_size = self.geometry()
         x = (screen.width() - window_size.width()) // 2
@@ -123,30 +172,27 @@ class LoginWindow(QMainWindow):
         self.move(x, y)
     
     def handle_login(self):
-        """Giriş işlemini gerçekleştirir."""
         tc_id = self.tc_input.text()
         password = self.password_input.text()
         
-        # Girdi doğrulama
+        # Input validation
         if not tc_id or not password:
             QMessageBox.warning(self, "Hata", "TC Kimlik ve Şifre alanları boş bırakılamaz.")
             return
         
-        # Giriş yapmayı dene
+        # Try to login
         user = AuthController.login(tc_id, password)
         
         if not user:
             QMessageBox.warning(self, "Hata", "TC Kimlik veya şifre hatalı.")
             return
         
-        # Kullanıcı tipine göre ilgili paneli göster
+        # Show appropriate panel based on user type
         if user.user_type == 'doctor':
-            # Doktor panelini aç
             self.doctor_panel = DoctorPanel(user)
             self.doctor_panel.show()
             self.hide()
         elif user.user_type == 'patient':
-            # Hasta panelini aç
             self.patient_panel = PatientPanel(user)
             self.patient_panel.show()
             self.hide()

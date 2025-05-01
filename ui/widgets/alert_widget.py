@@ -1,132 +1,163 @@
 # ui/widgets/alert_widget.py
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
-from PyQt5.QtGui import QIcon, QFont
+from PyQt5.QtGui import QIcon, QFont, QColor
 from PyQt5.QtCore import Qt, pyqtSignal
 
+from models.alert import Alert
 from controllers.alert_controller import AlertController
 from utils.date_utils import DateUtils
 
 class AlertWidget(QWidget):
+    # Signal when alert is marked as read
     marked_as_read = pyqtSignal()
     
-    def __init__(self, alert):
-        super().__init__()
-        self.alert = alert
+    def __init__(self, alert_data, parent=None):
+        super().__init__(parent)
+        self.alert_data = alert_data
         self.initUI()
     
     def initUI(self):
         layout = QVBoxLayout()
         self.setLayout(layout)
         
-        # Widget stilini belirle
-        self.setStyleSheet("""
-            QWidget {
-                background-color: #f8f9fa;
-                border: 1px solid #e9ecef;
-                border-radius: 5px;
-                padding: 5px;
-            }
-        """)
+        # Alert container
+        alert_type = self.alert_data['alert_type']
         
-        # Üst kısım (başlık ve tarih)
+        # Set style based on alert type
+        if alert_type == Alert.TYPE_HYPOGLYCEMIA or alert_type == Alert.TYPE_HYPERGLYCEMIA:
+            self.setStyleSheet("""
+                QWidget {
+                    background-color: #FFEBEE;
+                    border: 1px solid #FFCDD2;
+                    border-left: 5px solid #F44336;
+                    border-radius: 5px;
+                    padding: 10px;
+                }
+            """)
+        elif alert_type == Alert.TYPE_MISSING_MEASUREMENT or alert_type == Alert.TYPE_INSUFFICIENT_MEASUREMENT:
+            self.setStyleSheet("""
+                QWidget {
+                    background-color: #FFF3E0;
+                    border: 1px solid #FFE0B2;
+                    border-left: 5px solid #FF9800;
+                    border-radius: 5px;
+                    padding: 10px;
+                }
+            """)
+        elif alert_type == Alert.TYPE_MEDIUM_HIGH or alert_type == Alert.TYPE_HIGH:
+            self.setStyleSheet("""
+                QWidget {
+                    background-color: #E3F2FD;
+                    border: 1px solid #BBDEFB;
+                    border-left: 5px solid #2196F3;
+                    border-radius: 5px;
+                    padding: 10px;
+                }
+            """)
+        else:
+            self.setStyleSheet("""
+                QWidget {
+                    background-color: #E8F5E9;
+                    border: 1px solid #C8E6C9;
+                    border-left: 5px solid #4CAF50;
+                    border-radius: 5px;
+                    padding: 10px;
+                }
+            """)
+        
+        # Header with alert type and date
         header_layout = QHBoxLayout()
         
-        # Uyarı tipine göre ikon
-        type_icon = QLabel()
-        if self.alert['alert_type'] in ['hypoglycemia', 'hyperglycemia']:
-            type_icon.setText("⚠️")
-        elif self.alert['alert_type'] in ['missing_measurement', 'insufficient_measurement']:
-            type_icon.setText("⚠️")
+        # Alert type
+        alert_type_label = QLabel(self.get_alert_type_name())
+        alert_type_label.setFont(QFont("Segoe UI", 12, QFont.Bold))
+        
+        # Set text color based on alert type
+        if alert_type == Alert.TYPE_HYPOGLYCEMIA or alert_type == Alert.TYPE_HYPERGLYCEMIA:
+            alert_type_label.setStyleSheet("color: #D32F2F;")
+        elif alert_type == Alert.TYPE_MISSING_MEASUREMENT or alert_type == Alert.TYPE_INSUFFICIENT_MEASUREMENT:
+            alert_type_label.setStyleSheet("color: #F57C00;")
+        elif alert_type == Alert.TYPE_MEDIUM_HIGH or alert_type == Alert.TYPE_HIGH:
+            alert_type_label.setStyleSheet("color: #1976D2;")
         else:
-            type_icon.setText("ℹ️")
+            alert_type_label.setStyleSheet("color: #388E3C;")
         
-        type_icon.setFont(QFont("Arial", 14))
+        header_layout.addWidget(alert_type_label)
         
-        # Uyarı başlığı
-        alert_type_map = {
-            'hypoglycemia': "Hipoglisemi Riski",
-            'normal': "Normal Seviye",
-            'medium_high': "Takip Uyarısı",
-            'high': "İzleme Uyarısı",
-            'hyperglycemia': "Acil Müdahale Uyarısı",
-            'missing_measurement': "Ölçüm Eksik Uyarısı",
-            'insufficient_measurement': "Ölçüm Yetersiz Uyarısı"
-        }
-        
-        title_label = QLabel(alert_type_map.get(self.alert['alert_type'], str(self.alert['alert_type'])))
-        title_label.setFont(QFont("Arial", 11, QFont.Bold))
-        
-        # Uyarı seviyesine göre renklendirme
-        if self.alert['alert_type'] in ['hypoglycemia', 'hyperglycemia']:
-            title_label.setStyleSheet("color: #e74c3c;")  # Kırmızı
-        elif self.alert['alert_type'] in ['missing_measurement', 'insufficient_measurement']:
-            title_label.setStyleSheet("color: #e67e22;")  # Turuncu
-        
-        # Uyarı tarih ve saati
-        date_label = QLabel(DateUtils.format_datetime(self.alert['date']))
-        date_label.setStyleSheet("color: #7f8c8d; font-size: 10px;")
-        
-        header_layout.addWidget(type_icon)
-        header_layout.addWidget(title_label)
-        header_layout.addStretch(1)
+        # Date
+        date_label = QLabel(DateUtils.format_datetime(self.alert_data['date']))
+        date_label.setStyleSheet("color: #757575; font-size: 11px;")
+        date_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         header_layout.addWidget(date_label)
         
-        # Uyarı mesajı
-        message_label = QLabel(self.alert['message'])
+        layout.addLayout(header_layout)
+        
+        # Alert message
+        message_label = QLabel(self.alert_data['message'])
         message_label.setWordWrap(True)
+        message_label.setStyleSheet("color: #333333; margin-top: 5px;")
+        layout.addWidget(message_label)
         
-        # Alt kısım (kan şekeri değeri ve okundu butonu)
-        footer_layout = QHBoxLayout()
-        
-        # Kan şekeri değeri
-        if self.alert['glucose_level'] is not None:
-            glucose_label = QLabel(f"Kan Şekeri: {self.alert['glucose_level']} mg/dL")
+        # Action buttons
+        if not self.alert_data['is_read']:
+            action_layout = QHBoxLayout()
+            action_layout.setContentsMargins(0, 10, 0, 0)
             
-            # Değere göre renklendirme
-            if self.alert['glucose_level'] < 70:
-                glucose_label.setStyleSheet("color: #e74c3c;")  # Düşük - kırmızı
-            elif self.alert['glucose_level'] > 180:
-                glucose_label.setStyleSheet("color: #e67e22;")  # Yüksek - turuncu
-                
-            footer_layout.addWidget(glucose_label)
-        
-        footer_layout.addStretch(1)
-        
-        # Okundu butonu
-        if not self.alert['is_read']:
-            read_button = QPushButton("Okundu İşaretle")
+            # Mark as read button
+            read_button = QPushButton("Okundu Olarak İşaretle")
+            read_button.setCursor(Qt.PointingHandCursor)
             read_button.setStyleSheet("""
                 QPushButton {
-                    background-color: #3498db;
-                    color: white;
-                    border-radius: 3px;
+                    background-color: #FFFFFF;
+                    border: 1px solid #E0E0E0;
+                    border-radius: 4px;
                     padding: 5px 10px;
+                    color: #333333;
+                    font-weight: bold;
                 }
                 QPushButton:hover {
-                    background-color: #2980b9;
+                    background-color: #F5F5F5;
                 }
             """)
             read_button.clicked.connect(self.mark_as_read)
-            footer_layout.addWidget(read_button)
+            
+            action_layout.addStretch(1)
+            action_layout.addWidget(read_button)
+            
+            layout.addLayout(action_layout)
+    
+    def get_alert_type_name(self):
+        """Get display name for alert type."""
+        alert_type = self.alert_data['alert_type']
         
-        # Layout'a bileşenleri ekle
-        layout.addLayout(header_layout)
-        layout.addWidget(message_label)
-        layout.addLayout(footer_layout)
+        if alert_type == Alert.TYPE_HYPOGLYCEMIA:
+            return "⚠️ Hipoglisemi Riski"
+        elif alert_type == Alert.TYPE_NORMAL:
+            return "✅ Normal Seviye"
+        elif alert_type == Alert.TYPE_MEDIUM_HIGH:
+            return "ℹ️ Takip Uyarısı"
+        elif alert_type == Alert.TYPE_HIGH:
+            return "⚠️ İzleme Uyarısı"
+        elif alert_type == Alert.TYPE_HYPERGLYCEMIA:
+            return "🚨 Acil Müdahale Uyarısı"
+        elif alert_type == Alert.TYPE_MISSING_MEASUREMENT:
+            return "⚠️ Ölçüm Eksik Uyarısı"
+        elif alert_type == Alert.TYPE_INSUFFICIENT_MEASUREMENT:
+            return "⚠️ Ölçüm Yetersiz Uyarısı"
+        
+        return alert_type.capitalize()
     
     def mark_as_read(self):
-        """Uyarıyı okundu olarak işaretler."""
-        success = AlertController.mark_alert_as_read(self.alert['id'])
+        """Mark alert as read."""
+        alert_id = self.alert_data['id']
+        success = AlertController.mark_alert_as_read(alert_id)
         
         if success:
-            self.alert['is_read'] = True
+            # Update local alert data
+            self.alert_data['is_read'] = True
+            
+            # Emit signal
             self.marked_as_read.emit()
             
-            # Widget'ı güncelle (okundu butonunu kaldır)
-            for i in reversed(range(self.layout().count())):
-                item = self.layout().itemAt(i)
-                if item.layout():
-                    for j in reversed(range(item.layout().count())):
-                        widget = item.layout().itemAt(j).widget()
-                        if isinstance(widget, QPushButton) and widget.text() == "Okundu İşaretle":
-                            widget.deleteLater()
+            # Update UI
+            self.initUI()
