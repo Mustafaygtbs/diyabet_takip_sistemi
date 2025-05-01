@@ -6,8 +6,8 @@ from email.mime.multipart import MIMEMultipart
 class EmailSender:
     SMTP_SERVER = 'smtp.gmail.com'
     SMTP_PORT = 587
-    SENDER_EMAIL = 'diyabet.takip@gmail.com'
-    SENDER_PASSWORD = 'your_app_password'  # Gmail için uygulama şifresi kullanın
+    SENDER_EMAIL = 'mustafayigitbasi86@gmail.com'
+    SENDER_PASSWORD = 'uttjrbnmhhxteley'  # Gmail için uygulama şifresi kullanın
     
     @staticmethod
     def send_email(recipient, subject, message):

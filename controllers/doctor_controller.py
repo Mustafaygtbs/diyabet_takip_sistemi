@@ -11,7 +11,7 @@ from database.queries import (
 )
 from controllers.auth_controller import AuthController
 from utils.email_sender import EmailSender
-
+from database.connection import DatabaseConnection 
 class DoctorController:
     @staticmethod
     def register_doctor(tc_id, password, name, surname, birthdate, gender, email, 
@@ -151,6 +151,7 @@ class DoctorController:
         
         return patients
     
+    
     @staticmethod
     def register_patient(doctor_id, tc_id, name, surname, birthdate, gender, email, 
                         profile_image, diagnosis, diabetes_type, diagnosis_date):
@@ -159,57 +160,133 @@ class DoctorController:
         
         :return: Başarılıysa hasta nesnesi, değilse None
         """
-        # Rastgele şifre oluştur
-        password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+        db = DatabaseConnection.get_instance()
+        connection = None
+        cursor = None
         
-        # Kullanıcı nesnesi oluştur
-        patient = Patient()
-        patient.tc_id = tc_id
-        patient.password = AuthController.hash_password(password)
-        patient.name = name
-        patient.surname = surname
-        patient.birthdate = birthdate
-        patient.gender = gender
-        patient.email = email
-        patient.profile_image = profile_image
-        patient.doctor_id = doctor_id
-        patient.diagnosis = diagnosis
-        patient.diabetes_type = diabetes_type
-        patient.diagnosis_date = diagnosis_date
-        
-        # Kullanıcı tablosuna ekle
-        user_id = UserQueries.insert_user(patient)
-        
-        if not user_id:
+        try:
+            # Veritabanı bağlantısı al
+            connection = db.get_connection()
+            cursor = connection.cursor()
+            
+            # Rastgele şifre oluştur
+            password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+            
+            # Kullanıcı nesnesi oluştur
+            patient = Patient()
+            patient.tc_id = tc_id
+            patient.password = AuthController.hash_password(password)
+            patient.name = name
+            patient.surname = surname
+            patient.birthdate = birthdate
+            patient.gender = gender
+            patient.email = email
+            
+            # Profil resmi işleme - QByteArray sorununu çöz
+            if profile_image is not None:
+                if hasattr(profile_image, 'data'):
+                    # QByteArray için data() metodu kullanılır
+                    patient.profile_image = bytes(profile_image.data())
+                elif isinstance(profile_image, bytes):
+                    # Zaten bytes tipinde ise direkt kullan
+                    patient.profile_image = profile_image
+                else:
+                    # Diğer durumlarda None olarak ayarla
+                    patient.profile_image = None
+            else:
+                patient.profile_image = None
+            
+            # Transaction başlat
+            connection.autocommit = False
+            
+            # Users tablosuna ekle
+            insert_user_query = """
+            INSERT INTO users (tc_id, password, name, surname, birthdate, gender, email, profile_image, user_type)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id;
+            """
+            
+            cursor.execute(insert_user_query, (
+                patient.tc_id, 
+                patient.password, 
+                patient.name, 
+                patient.surname, 
+                patient.birthdate, 
+                patient.gender, 
+                patient.email, 
+                patient.profile_image, 
+                'patient'
+            ))
+            
+            user_id = cursor.fetchone()[0]
+            
+            if not user_id:
+                connection.rollback()
+                return None
+            
+            # Patients tablosuna ekle
+            insert_patient_query = """
+            INSERT INTO patients (user_id, doctor_id, diagnosis, diabetes_type, diagnosis_date)
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING id;
+            """
+            
+            cursor.execute(insert_patient_query, (
+                user_id,
+                doctor_id,
+                diagnosis,
+                diabetes_type,
+                diagnosis_date
+            ))
+            
+            patient_id = cursor.fetchone()[0]
+            
+            if not patient_id:
+                connection.rollback()
+                return None
+            
+            # Transaction'ı onayla
+            connection.commit()
+            
+            patient.id = patient_id
+            
+            # Hastaya bilgilendirme e-postası gönder
+            subject = "Diyabet Takip Sistemi - Hasta Kaydınız"
+            message = f"""
+            Sayın {name} {surname},
+            
+            Diyabet Takip Sistemi'ne kaydınız oluşturulmuştur.
+            
+            Giriş bilgileriniz:
+            TC Kimlik: {tc_id}
+            Şifre: {password}
+            
+            İlk girişinizden sonra güvenliğiniz için lütfen şifrenizi değiştiriniz.
+            
+            Sağlıklı günler dileriz.
+            """
+            
+            try:
+                EmailSender.send_email(email, subject, message)
+            except Exception as e:
+                print(f"E-posta gönderme hatası: {e}")
+                # E-posta gönderilemese bile hasta kaydı oluşturuldu
+            
+            return patient
+            
+        except Exception as e:
+            if connection:
+                connection.rollback()
+            print(f"Hasta kaydı sırasında hata: {e}")
             return None
+        finally:
+            if cursor:
+                cursor.close()
+            if connection:
+                connection.autocommit = True  # Orijinal duruma geri getir
+                db.release_connection(connection)
         
-        # Hasta tablosuna ekle
-        patient_id = PatientQueries.insert_patient(patient, user_id)
-        
-        if not patient_id:
-            return None
-        
-        patient.id = patient_id
-        
-        # Hastaya bilgilendirme e-postası gönder
-        subject = "Diyabet Takip Sistemi - Hasta Kaydınız"
-        message = f"""
-        Sayın {name} {surname},
-        
-        Diyabet Takip Sistemi'ne kaydınız oluşturulmuştur.
-        
-        Giriş bilgileriniz:
-        TC Kimlik: {tc_id}
-        Şifre: {password}
-        
-        İlk girişinizden sonra güvenliğiniz için lütfen şifrenizi değiştiriniz.
-        
-        Sağlıklı günler dileriz.
-        """
-        
-        EmailSender.send_email(email, subject, message)
-        
-        return patient
+   
     
     @staticmethod
     def get_patient_measurements(patient_id, start_date=None, end_date=None):

@@ -274,3 +274,63 @@ class PatientController:
             elif set(['slow_healing', 'weight_loss']).intersection(symptoms):
                 return Diet.TYPE_NO_SUGAR, Exercise.TYPE_WALKING
             return Diet.TYPE_NO_SUGAR, Exercise.TYPE_CLINICAL
+        
+    @staticmethod
+    def get_measurements_by_date_range(patient_id, start_date, end_date):
+        """
+        Belirlenen tarih aralığındaki ölçümleri getirir.
+        
+        :param patient_id: Hasta ID
+        :param start_date: Başlangıç tarihi
+        :param end_date: Bitiş tarihi
+        :return: Ölçüm listesi
+        """
+        return MeasurementQueries.get_measurements_by_date_range(patient_id, start_date, end_date)
+    @staticmethod
+    def get_patient_measurements(patient_id, limit=None):
+        """
+        Hastanın ölçümlerini getirir.
+        
+        :param patient_id: Hasta ID
+        :param limit: Maksimum ölçüm sayısı (varsayılan: None, tüm ölçümler)
+        :return: Ölçüm listesi
+        """
+        measurements = MeasurementQueries.get_measurements_by_patient_id(patient_id)
+        if limit and len(measurements) > limit:
+            return measurements[:limit]
+        return measurements
+    @staticmethod
+    def get_patient_diets(patient_id, limit=None):
+        """
+        Hastanın diyet kayıtlarını getirir.
+
+        :param patient_id: Hasta ID
+        :param limit: Maksimum kayıt sayısı (varsayılan: None, tüm kayıtlar)
+        :return: Diyet kaydı listesi
+        """
+        diets = DietQueries.get_diets_by_patient_id(patient_id)
+        return diets[:limit] if limit and diets else diets
+    
+    
+    @staticmethod
+    def get_patient_exercises(patient_id,limit=None):
+        exercises = ExerciseQueries.get_exercises_by_patient_id(patient_id)
+        return exercises[:limit] if limit and exercises else exercises
+    
+    @staticmethod
+    def get_patient_symptoms(patient_id, start_date=None, end_date=None, symptom_type=None):
+        """
+        Hastanın belirtilerini getirir.
+        
+        :param patient_id: Hasta ID
+        :param start_date: Başlangıç tarihi (opsiyonel)
+        :param end_date: Bitiş tarihi (opsiyonel)
+        :param symptom_type: Belirti türü (opsiyonel)
+        :return: Belirti listesi
+        """
+        if symptom_type:
+            return SymptomQueries.get_symptoms_by_type(patient_id, symptom_type)
+        elif start_date and end_date:
+            return SymptomQueries.get_symptoms_by_date_range(patient_id, start_date, end_date)
+        else:
+            return SymptomQueries.get_symptoms_by_patient_id(patient_id)

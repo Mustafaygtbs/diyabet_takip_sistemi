@@ -10,6 +10,7 @@ from controllers.patient_controller import PatientController
 from utils.date_utils import DateUtils
 
 from datetime import datetime, timedelta
+import numpy as np
 
 class GlucoseChartWidget(QWidget):
     def __init__(self, patient_id):
@@ -58,47 +59,72 @@ class GlucoseChartWidget(QWidget):
         # İlk çizimi yap
         self.update_chart()
     
-    def update_chart(self):
-        # Seçilen parametreleri al
-        days = self.period_combo.currentData()
-        view_type = self.view_combo.currentData()
-        
-        # Tarih aralığını belirle
+    def get_date_range(self):
+        """
+        Seçilen periyoda göre tarih aralığı döndürür.
+        """
         end_date = datetime.now().date()
+        days = self.period_combo.currentData()
         start_date = end_date - timedelta(days=days)
-        
-        # Ölçümleri al
-        measurements = PatientController.get_measurements_by_date_range(self.patient_id, start_date, end_date)
-        
-        # Grafik tipine göre verileri hazırla ve çiz
-        self.figure.clear()
-        
-        if not measurements:
+        return start_date, end_date
+    
+    def update_chart(self):
+        """
+        Seçilen görünüm tipine göre grafiği günceller.
+        """
+        try:
+            # Figürü temizle
+            self.figure.clear()
+            
+            # Tarih aralığını al
+            start_date, end_date = self.get_date_range()
+            
+            # Ölçümleri getir
+            measurements = PatientController.get_measurements_by_date_range(self.patient_id, start_date, end_date)
+            
+            # Görünüm tipine göre grafiği çiz
+            view_type = self.view_combo.currentData()
+            
+            if not measurements:
+                # Ölçüm yoksa boş grafik göster
+                ax = self.figure.add_subplot(111)
+                ax.text(0.5, 0.5, 'Bu tarih aralığında ölçüm bulunamadı', 
+                        ha='center', va='center', transform=ax.transAxes)
+                self.canvas.draw()
+                return
+            
+            if view_type == "daily":
+                self.plot_daily_average(measurements)
+            elif view_type == "all":
+                self.plot_all_measurements(measurements)
+            elif view_type == "period":
+                self.plot_period_measurements(measurements)
+            
+            # Grafiği güncelle
+            self.canvas.draw()
+            
+        except Exception as e:
+            print(f"Grafik güncellenirken hata: {e}")
+            # Hata mesajı göster
+            self.figure.clear()
             ax = self.figure.add_subplot(111)
-            ax.text(0.5, 0.5, 'Bu tarih aralığında veri bulunamadı', 
+            ax.text(0.5, 0.5, f'Grafik oluşturulurken hata: {str(e)}', 
                     ha='center', va='center', transform=ax.transAxes)
             self.canvas.draw()
-            return
-        
-        if view_type == "daily":
-            self.plot_daily_average(measurements)
-        elif view_type == "all":
-            self.plot_all_measurements(measurements)
-        elif view_type == "period":
-            self.plot_period_measurements(measurements)
-        
-        self.canvas.draw()
     
     def plot_daily_average(self, measurements):
+        """
+        Günlük ortalama kan şekeri grafiği oluşturur.
+        """
         # Ölçümleri tarihe göre grupla
         daily_values = {}
         
         for m in measurements:
             date_str = DateUtils.format_date(m['measurement_date'])
             if date_str in daily_values:
-                daily_values[date_str].append(m['glucose_level'])
+                daily_values[date_str].append(float(m['glucose_level']))
             else:
-                daily_values[date_str] = [m['glucose_level']]
+                daily_values[date_str] = [float(m['glucose_level'])]
         
         # Günlük ortalamaları hesapla
         dates = []
@@ -130,6 +156,9 @@ class GlucoseChartWidget(QWidget):
         self.figure.tight_layout()
     
     def plot_all_measurements(self, measurements):
+        """
+        Tüm kan şekeri ölçümlerini gösteren grafik oluşturur.
+        """
         # Tüm ölçümleri tarih ve saate göre sırala
         dates = []
         values = []
@@ -138,12 +167,13 @@ class GlucoseChartWidget(QWidget):
         for m in measurements:
             date_time = f"{DateUtils.format_date(m['measurement_date'])} {DateUtils.format_time(m['measurement_time'])}"
             dates.append(date_time)
-            values.append(m['glucose_level'])
+            value = float(m['glucose_level'])
+            values.append(value)
             
             # Değere göre renklendirme
-            if m['glucose_level'] < 70:
+            if value < 70:
                 colors.append('red')
-            elif m['glucose_level'] > 180:
+            elif value > 180:
                 colors.append('orange')
             else:
                 colors.append('#3498db')
@@ -174,6 +204,9 @@ class GlucoseChartWidget(QWidget):
         self.figure.tight_layout()
     
     def plot_period_measurements(self, measurements):
+        """
+        Periyotlara göre kan şekeri ölçümlerini gösteren grafik oluşturur.
+        """
         # Ölçümleri periyoda göre grupla
         period_values = {
             'morning': [],
@@ -186,7 +219,7 @@ class GlucoseChartWidget(QWidget):
         for m in measurements:
             period = m['period']
             if period in period_values:
-                period_values[period].append(m['glucose_level'])
+                period_values[period].append(float(m['glucose_level']))
         
         # Periyot ortalamalarını hesapla
         period_names = {
@@ -210,7 +243,7 @@ class GlucoseChartWidget(QWidget):
                 mean = sum(values) / len(values)
                 variance = sum((x - mean) ** 2 for x in values) / len(values)
                 std_devs.append((variance ** 0.5) / 2)  # Yarı standart sapma (görsel amaçlı)
-            
+        
         # Grafiği çiz
         ax = self.figure.add_subplot(111)
         
@@ -229,6 +262,6 @@ class GlucoseChartWidget(QWidget):
             ax.legend()
         else:
             ax.text(0.5, 0.5, 'Periyot verisi bulunamadı', 
-                    ha='center', va='center')
+                    ha='center', va='center', transform=ax.transAxes)
         
         self.figure.tight_layout()

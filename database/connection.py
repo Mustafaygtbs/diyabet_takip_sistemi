@@ -24,7 +24,7 @@ class DatabaseConnection:
                'user': 'postgres',
                'password': 'mustafa',
                'port': 5432,
-               'client_encoding': 'utf8'
+               'client_encoding': 'UTF8' 
            }
            self.init_connection_pool()
    

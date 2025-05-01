@@ -3,6 +3,7 @@ import sys
 from PyQt5.QtWidgets import QApplication
 from database.connection import DatabaseConnection
 from database.models import setup_database
+from database.seeder import DataSeeder  # Yeni import satırı
 from ui.login_window import LoginWindow
 
 def main():
@@ -19,6 +20,9 @@ def main():
         
         # Veritabanı şemasını oluştur
         setup_database()
+        
+        # Veritabanı başlangıç verilerini ekle (Yeni eklenen kısım)
+        DataSeeder.seed_database()
         
         # Giriş ekranını göster
         login_window = LoginWindow()
