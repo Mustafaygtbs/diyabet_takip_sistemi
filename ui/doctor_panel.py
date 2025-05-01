@@ -6,7 +6,8 @@ from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                             QAction, QStackedWidget, QFormLayout, QLineEdit,
                             QTextEdit, QRadioButton, QButtonGroup, QCheckBox,
                             QSpacerItem, QSizePolicy, QScrollArea, QListWidget,
-                            QListWidgetItem, QGridLayout, QDialog, QFileDialog)
+                            QListWidgetItem, QGridLayout, QDialog, QFileDialog,
+                            QGroupBox) 
 from PyQt5.QtGui import QIcon, QPixmap, QFont, QColor
 from PyQt5.QtCore import Qt, QDate
 
@@ -24,6 +25,7 @@ from models.alert import Alert
 
 from controllers.doctor_controller import DoctorController
 from controllers.alert_controller import AlertController
+from controllers.patient_controller import PatientController # Bu satırı ekle
 
 from ui.widgets.glucose_chart import GlucoseChartWidget
 from ui.widgets.exercise_chart import ExerciseChartWidget
@@ -276,6 +278,7 @@ class DoctorPanel(QMainWindow):
         for i in range(self.patient_list.count()):
             item = self.patient_list.item(i)
             patient_id = item.data(Qt.UserRole)
+# Hasta bilgilerini PatientController kullanarak al
             patient = PatientController.get_patient_by_id(patient_id)
             
             # İsim, TC Kimlik veya teşhise göre ara

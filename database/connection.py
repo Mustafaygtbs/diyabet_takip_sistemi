@@ -65,37 +65,29 @@ class DatabaseConnection:
            print("Veritabanı bağlantıları kapatılırken hata:", error)
    
    def execute_query(self, query, params=None, fetch=True):
-       """
-       SQL sorgusu çalıştırır ve sonuçları döndürür.
-       
-       :param query: Çalıştırılacak SQL sorgusu
-       :param params: Sorgu parametreleri (tuple, dict veya list)
-       :param fetch: Sonuçları çekme (True) veya sadece çalıştırma (False)
-       :return: Sorgu sonuçları veya etkilenen satır sayısı
-       """
-       connection = None
-       cursor = None
-       try:
-           connection = self.get_connection()
-           cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-           cursor.execute(query, params)
-           
-           if fetch:
-               result = cursor.fetchall()
-               return result
-           else:
-               connection.commit()
-               return cursor.rowcount
-       except (Exception, psycopg2.Error) as error:
-           if connection:
-               connection.rollback()
-           print("Sorgu çalıştırılırken hata:", error)
-           raise
-       finally:
-           if cursor:
-               cursor.close()
-           if connection:
-               self.release_connection(connection)
+    connection = None
+    cursor = None
+    try:
+        connection = self.get_connection()
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor.execute(query, params)
+        connection.commit()  # Her durumda commit et
+        
+        if fetch:
+            result = cursor.fetchall()
+            return result
+        else:
+            return cursor.rowcount
+    except Exception as e:
+        if connection:
+            connection.rollback()
+        print(f"Sorgu hatası: {e}")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            self.release_connection(connection)
    
    def execute_batch(self, query, params_list):
        """

@@ -1048,28 +1048,34 @@ class PatientPanel(QMainWindow):
         
         # Ölçümü kaydet
         try:
-            PatientController.add_measurement(
-                self.patient.id,
-                glucose_level,
-                measurement_date,
-                measurement_time,
-                period,
-                notes
+            print(f"Ölçüm kaydediliyor: {self.patient.id}, {glucose_level}, {measurement_date}, {measurement_time}, {period}")
+            measurement_id = PatientController.add_measurement(
+                patient_id=self.patient.id,
+                glucose_level=glucose_level,
+                measurement_date=measurement_date,
+                measurement_time=measurement_time,
+                period=period,
+                notes=notes
             )
+            print(f"Dönen ölçüm ID: {measurement_id}")
             
-            QMessageBox.information(self, "Başarılı", "Kan şekeri ölçümü başarıyla kaydedildi.")
-            
-            # Formu temizle
-            self.glucose_value.clear()
-            self.measurement_notes.clear()
-            
-            # Tabloyu güncelle
-            self.load_measurements()
-            
-            # Dashboard'ı güncelle
-            self.load_dashboard()
-            
+            if measurement_id:
+                QMessageBox.information(self, "Başarılı", "Kan şekeri ölçümü başarıyla kaydedildi.")
+                
+                # Formu temizle
+                self.glucose_value.clear()
+                self.measurement_notes.clear()
+                
+                # Tabloyu güncelle
+                self.load_measurements()
+                
+                # Dashboard'ı güncelle
+                self.load_dashboard()
+            else:
+                QMessageBox.warning(self, "Hata", "Ölçüm kaydedilemedi. Veritabanı hatası oluştu.")
+                
         except Exception as e:
+            print(f"Hata detayı: {e}")
             QMessageBox.critical(self, "Hata", f"Ölçüm kaydedilirken bir hata oluştu: {str(e)}")
     
     def save_diet(self):

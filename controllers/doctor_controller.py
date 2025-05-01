@@ -405,3 +405,20 @@ class DoctorController:
             end_date = datetime.now().date()
             
         return DietQueries.get_diet_compliance_percentage(patient_id, start_date, end_date)
+    
+    def filter_patients(self):
+        search_text = self.search_input.text().lower()
+        
+        for i in range(self.patient_list.count()):
+            item = self.patient_list.item(i)
+            patient_id = item.data(Qt.UserRole)
+            # DoctorController.get_patient_by_id yerine PatientController.get_patient_by_id kullanın
+            patient = PatientController.get_patient_by_id(patient_id)
+            
+            # İsim, TC Kimlik veya teşhise göre ara
+            if (search_text in f"{patient.name} {patient.surname}".lower() or
+                search_text in patient.tc_id.lower() or
+                (patient.diagnosis and search_text in patient.diagnosis.lower())):
+                item.setHidden(False)
+            else:
+                item.setHidden(True)

@@ -26,6 +26,7 @@ class AuthController:
     
     @staticmethod
     def verify_password(stored_password, provided_password):
+
         salt = stored_password[:64]
         stored_hash = stored_password[64:]
         
@@ -35,6 +36,7 @@ class AuthController:
         hash_hex = binascii.hexlify(hash_bytes).decode('ascii')
         
         return hash_hex == stored_hash
+        
 
     @staticmethod
     def login(tc_id, password):
