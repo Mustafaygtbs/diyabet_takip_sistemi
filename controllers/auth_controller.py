@@ -26,14 +26,19 @@ class AuthController:
     
     @staticmethod
     def verify_password(stored_password, provided_password):
-
+        print(f"Stored password length: {len(stored_password)}")
+        print(f"First 10 chars: {stored_password[:10]}")
+        
         salt = stored_password[:64]
         stored_hash = stored_password[64:]
         
         # Aynı salt ile hash'leme
         hash_bytes = hashlib.pbkdf2_hmac('sha512', provided_password.encode('utf-8'), 
-                                          salt.encode('ascii'), 100000)
+                                        salt.encode('ascii'), 100000)
         hash_hex = binascii.hexlify(hash_bytes).decode('ascii')
+        
+        print(f"Calculated hash: {hash_hex[:10]}...")
+        print(f"Stored hash: {stored_hash[:10]}...")
         
         return hash_hex == stored_hash
         
@@ -97,28 +102,34 @@ class AuthController:
     
     @staticmethod
     def change_password(user_id, old_password, new_password):
-        """
-        Şifre değiştirir.
+        # user_id patients tablosundan geliyor, users tablosundan almalıyız
+        patient_data = PatientQueries.get_patient_by_id(user_id)
         
-        :param user_id: Kullanıcı ID
-        :param old_password: Eski şifre
-        :param new_password: Yeni şifre
-        :return: Başarılıysa True, değilse False
-        """
-        user_data = UserQueries.get_user_by_id(user_id)
+        if not patient_data:
+            print(f"Patient not found with ID: {user_id}")
+            return False
+        
+        # Patient verisinden user_id'yi al
+        real_user_id = patient_data['user_id']
+        print(f"Real user ID: {real_user_id}")
+        
+        user_data = UserQueries.get_user_by_id(real_user_id)
         
         if not user_data:
+            print(f"User not found with ID: {real_user_id}")
             return False
         
         stored_password = user_data['password']
         
         if not AuthController.verify_password(stored_password, old_password):
+            print("Password verification failed")
             return False
         
         # Yeni şifreyi hash'le
         hashed_password = AuthController.hash_password(new_password)
         
         # Şifreyi güncelle
-        result = UserQueries.update_password(user_id, hashed_password)
+        result = UserQueries.update_password(real_user_id, hashed_password)
+        print(f"Password update result: {result}")
         
         return result is not None
