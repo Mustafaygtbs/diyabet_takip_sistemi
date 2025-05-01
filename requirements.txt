@@ -1,0 +1,4 @@
+PyQt5==5.15.9
+psycopg2-binary==2.9.6
+pandas==2.0.0
+matplotlib==3.7.1

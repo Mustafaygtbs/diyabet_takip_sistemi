@@ -1,0 +1,6 @@
+# controllers/__init__.py
+from controllers.auth_controller import AuthController
+from controllers.doctor_controller import DoctorController
+from controllers.patient_controller import PatientController
+from controllers.measurement_controller import MeasurementController
+from controllers.alert_controller import AlertController

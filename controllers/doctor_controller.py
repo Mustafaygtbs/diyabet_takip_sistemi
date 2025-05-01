@@ -1,0 +1,330 @@
+# controllers/doctor_controller.py
+import random
+import string
+from datetime import datetime, timedelta
+from models.doctor import Doctor
+from models.patient import Patient
+from models.user import User
+from database.queries import (
+    UserQueries, DoctorQueries, PatientQueries, 
+    MeasurementQueries, ExerciseQueries, DietQueries, SymptomQueries, AlertQueries
+)
+from controllers.auth_controller import AuthController
+from utils.email_sender import EmailSender
+
+class DoctorController:
+    @staticmethod
+    def register_doctor(tc_id, password, name, surname, birthdate, gender, email, 
+                        profile_image, specialty, hospital):
+        """
+        Doktor kaydeder.
+        
+        :return: Başarılıysa doktor nesnesi, değilse None
+        """
+        # Kullanıcı nesnesi oluştur
+        doctor = Doctor()
+        doctor.tc_id = tc_id
+        doctor.password = AuthController.hash_password(password)
+        doctor.name = name
+        doctor.surname = surname
+        doctor.birthdate = birthdate
+        doctor.gender = gender
+        doctor.email = email
+        doctor.profile_image = profile_image
+        doctor.specialty = specialty
+        doctor.hospital = hospital
+        
+        # Kullanıcı tablosuna ekle
+        user_id = UserQueries.insert_user(doctor)
+        
+        if not user_id:
+            return None
+        
+        # Doktor tablosuna ekle
+        doctor_id = DoctorQueries.insert_doctor(doctor, user_id)
+        
+        if not doctor_id:
+            return None
+        
+        doctor.id = doctor_id
+        return doctor
+    
+    @staticmethod
+    def update_doctor_profile(doctor_id, name, surname, birthdate, gender, email, 
+                             profile_image, specialty, hospital):
+        """
+        Doktor profilini günceller.
+        
+        :return: Başarılıysa doktor nesnesi, değilse None
+        """
+        # Doktor verisini al
+        doctor_data = DoctorQueries.get_doctor_by_id(doctor_id)
+        
+        if not doctor_data:
+            return None
+        
+        # User nesnesi oluştur
+        doctor = Doctor()
+        doctor.id = doctor_id
+        doctor.tc_id = doctor_data['tc_id']
+        doctor.name = name
+        doctor.surname = surname
+        doctor.birthdate = birthdate
+        doctor.gender = gender
+        doctor.email = email
+        doctor.profile_image = profile_image if profile_image else doctor_data['profile_image']
+        doctor.specialty = specialty
+        doctor.hospital = hospital
+        
+        # User tablosunu güncelle
+        updated_user_id = UserQueries.update_user(doctor)
+        
+        if not updated_user_id:
+            return None
+        
+        # Doktor tablosunu güncelle
+        updated_doctor_id = DoctorQueries.update_doctor(doctor)
+        
+        if not updated_doctor_id:
+            return None
+        
+        return doctor
+    
+    @staticmethod
+    def get_doctor_by_id(doctor_id):
+        """
+        ID'ye göre doktor getirir.
+        
+        :param doctor_id: Doktor ID
+        :return: Doktor nesnesi veya None
+        """
+        doctor_data = DoctorQueries.get_doctor_by_id(doctor_id)
+        
+        if not doctor_data:
+            return None
+        
+        doctor = Doctor()
+        doctor.id = doctor_data['id']
+        doctor.tc_id = doctor_data['tc_id']
+        doctor.name = doctor_data['name']
+        doctor.surname = doctor_data['surname']
+        doctor.birthdate = doctor_data['birthdate']
+        doctor.gender = doctor_data['gender']
+        doctor.email = doctor_data['email']
+        doctor.profile_image = doctor_data['profile_image']
+        doctor.user_type = doctor_data['user_type']
+        doctor.specialty = doctor_data['specialty']
+        doctor.hospital = doctor_data['hospital']
+        
+        return doctor
+    
+    @staticmethod
+    def get_doctor_patients(doctor_id):
+        """
+        Doktorun hastalarını getirir.
+        
+        :param doctor_id: Doktor ID
+        :return: Hasta nesnelerinin listesi
+        """
+        patients_data = DoctorQueries.get_doctor_patients(doctor_id)
+        
+        if not patients_data:
+            return []
+        
+        patients = []
+        for data in patients_data:
+            patient = Patient()
+            patient.id = data['id']
+            patient.tc_id = data['tc_id']
+            patient.name = data['name']
+            patient.surname = data['surname']
+            patient.birthdate = data['birthdate']
+            patient.gender = data['gender']
+            patient.email = data['email']
+            patient.profile_image = data['profile_image']
+            patient.user_type = data['user_type']
+            patient.doctor_id = data['doctor_id']
+            patient.diagnosis = data['diagnosis']
+            patient.diabetes_type = data['diabetes_type']
+            patient.diagnosis_date = data['diagnosis_date']
+            patients.append(patient)
+        
+        return patients
+    
+    @staticmethod
+    def register_patient(doctor_id, tc_id, name, surname, birthdate, gender, email, 
+                        profile_image, diagnosis, diabetes_type, diagnosis_date):
+        """
+        Hasta kaydeder.
+        
+        :return: Başarılıysa hasta nesnesi, değilse None
+        """
+        # Rastgele şifre oluştur
+        password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+        
+        # Kullanıcı nesnesi oluştur
+        patient = Patient()
+        patient.tc_id = tc_id
+        patient.password = AuthController.hash_password(password)
+        patient.name = name
+        patient.surname = surname
+        patient.birthdate = birthdate
+        patient.gender = gender
+        patient.email = email
+        patient.profile_image = profile_image
+        patient.doctor_id = doctor_id
+        patient.diagnosis = diagnosis
+        patient.diabetes_type = diabetes_type
+        patient.diagnosis_date = diagnosis_date
+        
+        # Kullanıcı tablosuna ekle
+        user_id = UserQueries.insert_user(patient)
+        
+        if not user_id:
+            return None
+        
+        # Hasta tablosuna ekle
+        patient_id = PatientQueries.insert_patient(patient, user_id)
+        
+        if not patient_id:
+            return None
+        
+        patient.id = patient_id
+        
+        # Hastaya bilgilendirme e-postası gönder
+        subject = "Diyabet Takip Sistemi - Hasta Kaydınız"
+        message = f"""
+        Sayın {name} {surname},
+        
+        Diyabet Takip Sistemi'ne kaydınız oluşturulmuştur.
+        
+        Giriş bilgileriniz:
+        TC Kimlik: {tc_id}
+        Şifre: {password}
+        
+        İlk girişinizden sonra güvenliğiniz için lütfen şifrenizi değiştiriniz.
+        
+        Sağlıklı günler dileriz.
+        """
+        
+        EmailSender.send_email(email, subject, message)
+        
+        return patient
+    
+    @staticmethod
+    def get_patient_measurements(patient_id, start_date=None, end_date=None):
+        """
+        Hastanın ölçümlerini getirir.
+        
+        :param patient_id: Hasta ID
+        :param start_date: Başlangıç tarihi (opsiyonel)
+        :param end_date: Bitiş tarihi (opsiyonel)
+        :return: Ölçüm listesi
+        """
+        if start_date and end_date:
+            return MeasurementQueries.get_measurements_by_date_range(patient_id, start_date, end_date)
+        else:
+            return MeasurementQueries.get_measurements_by_patient_id(patient_id)
+    
+    @staticmethod
+    def get_patient_exercises(patient_id, start_date=None, end_date=None):
+        """
+        Hastanın egzersizlerini getirir.
+        
+        :param patient_id: Hasta ID
+        :param start_date: Başlangıç tarihi (opsiyonel)
+        :param end_date: Bitiş tarihi (opsiyonel)
+        :return: Egzersiz listesi
+        """
+        if start_date and end_date:
+            return ExerciseQueries.get_exercises_by_date_range(patient_id, start_date, end_date)
+        else:
+            return ExerciseQueries.get_exercises_by_patient_id(patient_id)
+    
+    @staticmethod
+    def get_patient_diets(patient_id, start_date=None, end_date=None):
+        """
+        Hastanın diyet planlarını getirir.
+        
+        :param patient_id: Hasta ID
+        :param start_date: Başlangıç tarihi (opsiyonel)
+        :param end_date: Bitiş tarihi (opsiyonel)
+        :return: Diyet listesi
+        """
+        if start_date and end_date:
+            return DietQueries.get_diets_by_date_range(patient_id, start_date, end_date)
+        else:
+            return DietQueries.get_diets_by_patient_id(patient_id)
+    
+    @staticmethod
+    def get_patient_symptoms(patient_id, start_date=None, end_date=None, symptom_type=None):
+        """
+        Hastanın belirtilerini getirir.
+        
+        :param patient_id: Hasta ID
+        :param start_date: Başlangıç tarihi (opsiyonel)
+        :param end_date: Bitiş tarihi (opsiyonel)
+        :param symptom_type: Belirti türü (opsiyonel)
+        :return: Belirti listesi
+        """
+        if symptom_type:
+            return SymptomQueries.get_symptoms_by_type(patient_id, symptom_type)
+        elif start_date and end_date:
+            return SymptomQueries.get_symptoms_by_date_range(patient_id, start_date, end_date)
+        else:
+            return SymptomQueries.get_symptoms_by_patient_id(patient_id)
+    
+    @staticmethod
+    def get_patient_alerts(patient_id, start_date=None, end_date=None, alert_type=None, only_unread=False):
+        """
+        Hastanın uyarılarını getirir.
+        
+        :param patient_id: Hasta ID
+        :param start_date: Başlangıç tarihi (opsiyonel)
+        :param end_date: Bitiş tarihi (opsiyonel)
+        :param alert_type: Uyarı türü (opsiyonel)
+        :param only_unread: Sadece okunmamış uyarılar (opsiyonel)
+        :return: Uyarı listesi
+        """
+        if only_unread:
+            return AlertQueries.get_unread_alerts_by_patient_id(patient_id)
+        elif alert_type:
+            return AlertQueries.get_alerts_by_type(patient_id, alert_type)
+        elif start_date and end_date:
+            return AlertQueries.get_alerts_by_date_range(patient_id, start_date, end_date)
+        else:
+            return AlertQueries.get_alerts_by_patient_id(patient_id)
+    
+    @staticmethod
+    def get_exercise_compliance(patient_id, start_date=None, end_date=None):
+        """
+        Hastanın egzersiz uyum yüzdesini hesaplar.
+        
+        :param patient_id: Hasta ID
+        :param start_date: Başlangıç tarihi (opsiyonel)
+        :param end_date: Bitiş tarihi (opsiyonel)
+        :return: Uyum yüzdesi (0-100)
+        """
+        if not start_date:
+            start_date = datetime.now().date() - timedelta(days=30)
+        if not end_date:
+            end_date = datetime.now().date()
+            
+        return ExerciseQueries.get_exercise_compliance_percentage(patient_id, start_date, end_date)
+    
+    @staticmethod
+    def get_diet_compliance(patient_id, start_date=None, end_date=None):
+        """
+        Hastanın diyet uyum yüzdesini hesaplar.
+        
+        :param patient_id: Hasta ID
+        :param start_date: Başlangıç tarihi (opsiyonel)
+        :param end_date: Bitiş tarihi (opsiyonel)
+        :return: Uyum yüzdesi (0-100)
+        """
+        if not start_date:
+            start_date = datetime.now().date() - timedelta(days=30)
+        if not end_date:
+            end_date = datetime.now().date()
+            
+        return DietQueries.get_diet_compliance_percentage(patient_id, start_date, end_date)
