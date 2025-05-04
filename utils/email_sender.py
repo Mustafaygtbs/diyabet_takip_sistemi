@@ -7,18 +7,10 @@ class EmailSender:
     SMTP_SERVER = 'smtp.gmail.com'
     SMTP_PORT = 587
     SENDER_EMAIL = 'mustafayigitbasi86@gmail.com'
-    SENDER_PASSWORD = 'uttjrbnmhhxteley'  # Gmail için uygulama şifresi kullanın
+    SENDER_PASSWORD = 'uttjrbnmhhxteley'  
     
     @staticmethod
     def send_email(recipient, subject, message):
-        """
-        E-posta gönderir.
-        
-        :param recipient: Alıcı e-posta adresi
-        :param subject: E-posta konusu
-        :param message: E-posta içeriği
-        :return: Başarılıysa True, değilse False
-        """
         try:
             # E-posta oluştur
             msg = MIMEMultipart()

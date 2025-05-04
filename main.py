@@ -3,7 +3,7 @@ import sys
 from PyQt5.QtWidgets import QApplication
 from database.connection import DatabaseConnection
 from database.models import setup_database
-from database.seeder import DataSeeder  # Yeni import satırı
+from database.seeder import DataSeeder  
 from ui.login_window import LoginWindow
 
 def main():

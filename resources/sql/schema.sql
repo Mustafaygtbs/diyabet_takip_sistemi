@@ -1,7 +1,4 @@
--- resources/sql/schema.sql
--- Diyabet Takip Sistemi Veritabanı Şeması
 
--- Kullanıcı tablosu (doktor ve hastalar için ortak)
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     tc_id VARCHAR(11) UNIQUE NOT NULL,

@@ -16,12 +16,6 @@ from controllers.alert_controller import AlertController
 class PatientController:
     @staticmethod
     def get_patient_by_id(patient_id):
-        """
-        ID'ye göre hasta getirir.
-        
-        :param patient_id: Hasta ID
-        :return: Hasta nesnesi veya None
-        """
         patient_data = PatientQueries.get_patient_by_id(patient_id)
         
         if not patient_data:
