@@ -57,7 +57,7 @@ class PatientPanel(QMainWindow):
         # Main window settings
         self.setWindowTitle(f"Diyabet Takip Sistemi - {self.patient.name} {self.patient.surname}")
         self.setMinimumSize(1280, 800)
-        self.setWindowIcon(QIcon("resources/icons/app_icon.png"))
+        self.setWindowIcon(QIcon("resources/medical-check.png"))
         self.setStyleSheet("""
             QMainWindow {
                 background-color: #F5F5F5;
@@ -176,53 +176,53 @@ class PatientPanel(QMainWindow):
         top_panel = QWidget()
         top_layout = QHBoxLayout()
         top_panel.setLayout(top_layout)
-        top_panel.setMaximumHeight(80)
+        top_panel.setMaximumHeight(160)
         top_panel.setStyleSheet("""
             background-color: #3949AB;
             color: white;
-            border-radius: 5px;
+            border-radius: 8px;
             margin-bottom: 10px;
         """)
         
         # Patient info
         patient_info = QWidget()
         patient_info_layout = QHBoxLayout()
+        patient_info_layout.setSpacing(18)
+        patient_info_layout.setContentsMargins(20, 20, 20, 20)
         patient_info.setLayout(patient_info_layout)
+        patient_info.setFixedHeight(120)
         
-        # Profile picture
+        # Profil resmi (solda)
         profile_pic = QLabel()
         if self.patient.profile_image:
             pixmap = QPixmap()
             pixmap.loadFromData(self.patient.profile_image)
-            profile_pic.setPixmap(pixmap.scaled(60, 60, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            profile_pic.setPixmap(pixmap.scaled(90, 90, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         else:
             profile_pic.setText("👤")
-            profile_pic.setFont(QFont("Segoe UI", 24))
-        
+            profile_pic.setFont(QFont("Segoe UI", 40))
         profile_pic.setAlignment(Qt.AlignCenter)
-        profile_pic.setFixedSize(60, 60)
-        profile_pic.setStyleSheet("""
-            background-color: white;
-            border-radius: 30px;
-            border: 2px solid #C5CAE9;
-            padding: 2px;
-        """)
+        profile_pic.setFixedSize(90, 90)
+        profile_pic.setStyleSheet("background-color: white; border-radius: 45px; border: 3px solid #C5CAE9;")
         
-        # Patient name and type
+        # Ad-soyadı ve tip bilgisi (sağda, alt alta)
+        name_type_layout = QVBoxLayout()
+        name_type_layout.setSpacing(6)
         patient_name = QLabel(f"{self.patient.name} {self.patient.surname}")
-        patient_name.setFont(QFont("Segoe UI", 14, QFont.Bold))
-        
+        patient_name.setFont(QFont("Segoe UI", 20, QFont.Bold))
+        patient_name.setStyleSheet("color: white;")
+        patient_name.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        patient_name.setFixedWidth(320)
         patient_type = QLabel(self.patient.diabetes_type or "Hasta")
-        patient_type.setFont(QFont("Segoe UI", 12))
-        
-        patient_text = QWidget()
-        patient_text_layout = QVBoxLayout()
-        patient_text.setLayout(patient_text_layout)
-        patient_text_layout.addWidget(patient_name)
-        patient_text_layout.addWidget(patient_type)
+        patient_type.setFont(QFont("Segoe UI", 14))
+        patient_type.setStyleSheet("color: #C5CAE9;")
+        patient_type.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        name_type_layout.addWidget(patient_name)
+        name_type_layout.addWidget(patient_type)
         
         patient_info_layout.addWidget(profile_pic)
-        patient_info_layout.addWidget(patient_text)
+        patient_info_layout.addLayout(name_type_layout)
+        patient_info_layout.addStretch(1)
         
         # Logout button
         logout_button = QPushButton("Çıkış Yap")
@@ -242,10 +242,9 @@ class PatientPanel(QMainWindow):
                 background-color: #E0E0E0;
             }
         """)
-        logout_button.setIcon(QIcon("resources/icons/logout.png"))
+        logout_button.setIcon(QIcon("resources/medical-check.png"))
         logout_button.clicked.connect(self.logout)
         
-        # Complete top panel
         top_layout.addWidget(patient_info)
         top_layout.addStretch(1)
         top_layout.addWidget(logout_button)
@@ -262,15 +261,15 @@ class PatientPanel(QMainWindow):
                 background-color: #F5F5F5;
                 border: 1px solid #E0E0E0;
                 border-bottom: none;
-                border-top-left-radius: 6px;
-                border-top-right-radius: 6px;
-                padding: 14px 36px;
-                margin-right: 8px;
+                border-top-left-radius: 8px;
+                border-top-right-radius: 8px;
+                padding: 16px 48px;
+                margin-right: 10px;
                 color: #666666;
-                min-width: 190px;
-                max-width: 270px;
+                min-width: 220px;
+                max-width: 320px;
                 text-align: center;
-                font-size: 16px;
+                font-size: 17px;
                 font-family: 'Segoe UI', Arial, sans-serif;
             }
             QTabBar::tab:selected {
@@ -1557,6 +1556,7 @@ class PatientPanel(QMainWindow):
         
         # 7-day blood glucose chart
         chart_group = QGroupBox("Son 7 Günlük Kan Şekeri Grafiği")
+        chart_group.setMinimumHeight(260)
         chart_layout = QVBoxLayout()
         chart_group.setLayout(chart_layout)
         
@@ -1570,6 +1570,7 @@ class PatientPanel(QMainWindow):
         # Create chart
         chart_figure = Figure(figsize=(8, 4), dpi=100)
         chart_canvas = FigureCanvas(chart_figure)
+        chart_canvas.setMinimumHeight(220)
         chart_layout.addWidget(chart_canvas)
         
         # Group measurements by date

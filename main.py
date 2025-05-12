@@ -1,31 +1,33 @@
 # main.py
 import sys
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QIcon
 from database.connection import DatabaseConnection
 from database.models import setup_database
 from database.seeder import DataSeeder  
 from ui.login_window import LoginWindow
 
 def main():
-    # PyQt uygulamasını başlat
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon("resources/medical-check.png"))  
     
     try:
-        # Veritabanı bağlantısını başlat
+        # db bağlantısı kur
         db = DatabaseConnection.get_instance()
         
-        # Veritabanı bağlantısını test et
+        #  db test
         if not db.test_connection():
             raise Exception("Veritabanı bağlantısı kurulamadı.")
         
-        # Veritabanı şemasını oluştur
+        # db şema 
         setup_database()
         
-        # Veritabanı başlangıç verilerini ekle (Yeni eklenen kısım)
+        # başlangıç verilerini ekle 
         DataSeeder.seed_database()
         
         # Giriş ekranını göster
         login_window = LoginWindow()
+        login_window.setWindowIcon(QIcon("resources/medical-check.png"))  
         login_window.show()
         
         # Uygulamayı çalıştır

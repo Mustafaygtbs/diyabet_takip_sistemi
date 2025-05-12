@@ -59,7 +59,7 @@ class DoctorPanel(QMainWindow):
         # Main window settings
         self.setWindowTitle(f"Diyabet Takip Sistemi - Dr. {self.doctor.name} {self.doctor.surname}")
         self.setMinimumSize(1280, 800)
-        self.setWindowIcon(QIcon("resources/icons/app_icon.png"))
+        self.setWindowIcon(QIcon("resources/medical-check.png"))
         self.setStyleSheet("""
             QMainWindow {
                 background-color: #F5F5F5;
@@ -260,7 +260,7 @@ class DoctorPanel(QMainWindow):
         
         # Add patient button
         add_patient_button = QPushButton("Yeni Hasta")
-        add_patient_button.setIcon(QIcon("resources/icons/add_patient.png"))
+        add_patient_button.setIcon(QIcon("resources/medical-check.png"))
         add_patient_button.setStyleSheet("""
             QPushButton {
                 background-color: #4CAF50;

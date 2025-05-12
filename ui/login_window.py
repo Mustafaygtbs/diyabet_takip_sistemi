@@ -18,7 +18,7 @@ class LoginWindow(QMainWindow):
         # Main window settings
         self.setWindowTitle("Diyabet Takip Sistemi")
         self.setMinimumSize(800, 600)
-        self.setWindowIcon(QIcon("resources/icons/app_icon.png"))
+        self.setWindowIcon(QIcon("resources/medical-check.png"))
         
         # Main widget
         central_widget = QWidget()
@@ -42,7 +42,7 @@ class LoginWindow(QMainWindow):
         
         # Logo and app name
         logo_label = QLabel()
-        logo_pixmap = QPixmap("resources/icons/logo.png")
+        logo_pixmap = QPixmap("resources/medical-check.png")
         logo_label.setPixmap(logo_pixmap.scaled(180, 180, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         logo_label.setAlignment(Qt.AlignCenter)
         
