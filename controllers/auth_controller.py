@@ -26,8 +26,7 @@ class AuthController:
     
     @staticmethod
     def verify_password(stored_password, provided_password):
-        print(f"Stored password length: {len(stored_password)}")
-        print(f"First 10 chars: {stored_password[:10]}")
+
         
         salt = stored_password[:64]
         stored_hash = stored_password[64:]
@@ -37,8 +36,6 @@ class AuthController:
                                         salt.encode('ascii'), 100000)
         hash_hex = binascii.hexlify(hash_bytes).decode('ascii')
         
-        print(f"Calculated hash: {hash_hex[:10]}...")
-        print(f"Stored hash: {stored_hash[:10]}...")
         
         return hash_hex == stored_hash
         
@@ -106,12 +103,11 @@ class AuthController:
         patient_data = PatientQueries.get_patient_by_id(user_id)
         
         if not patient_data:
-            print(f"Patient not found with ID: {user_id}")
             return False
         
         # Patient verisinden user_id'yi al
         real_user_id = patient_data['user_id']
-        print(f"Real user ID: {real_user_id}")
+
         
         user_data = UserQueries.get_user_by_id(real_user_id)
         

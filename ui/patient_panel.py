@@ -26,6 +26,7 @@ from models.insulin import Insulin
 
 from controllers.patient_controller import PatientController
 from controllers.auth_controller import AuthController
+from controllers.doctor_controller import DoctorController
 
 from ui.widgets.glucose_chart import GlucoseChartWidget
 
@@ -70,17 +71,28 @@ class PatientPanel(QMainWindow):
                 background-color: #F5F5F5;
                 border: 1px solid #E0E0E0;
                 border-bottom: none;
-                border-top-left-radius: 4px;
-                border-top-right-radius: 4px;
-                padding: 8px 16px;
-                margin-right: 2px;
+                border-top-left-radius: 6px;
+                border-top-right-radius: 6px;
+                padding: 14px 36px;
+                margin-right: 8px;
                 color: #666666;
+                min-width: 190px;
+                max-width: 270px;
+                text-align: center;
+                font-size: 16px;
+                font-family: 'Segoe UI', Arial, sans-serif;
             }
             QTabBar::tab:selected {
                 background-color: white;
                 border-bottom: none;
                 font-weight: bold;
                 color: #3949AB;
+            }
+            QTabBar::tab:!selected {
+                color: #666666;
+            }
+            QTabBar::tab:hover {
+                background-color: #E8EAF6;
             }
             QGroupBox {
                 border: 1px solid #E0E0E0;
@@ -239,12 +251,39 @@ class PatientPanel(QMainWindow):
         top_layout.addWidget(logout_button)
         
         # Main content - Tabs
-        tabs = QTabWidget()
-        tabs.setStyleSheet("""
+        self.tabs = QTabWidget()
+        self.tabs.setStyleSheet("""
             QTabWidget::pane {
                 border: 1px solid #E0E0E0;
                 border-radius: 5px;
                 background-color: white;
+            }
+            QTabBar::tab {
+                background-color: #F5F5F5;
+                border: 1px solid #E0E0E0;
+                border-bottom: none;
+                border-top-left-radius: 6px;
+                border-top-right-radius: 6px;
+                padding: 14px 36px;
+                margin-right: 8px;
+                color: #666666;
+                min-width: 190px;
+                max-width: 270px;
+                text-align: center;
+                font-size: 16px;
+                font-family: 'Segoe UI', Arial, sans-serif;
+            }
+            QTabBar::tab:selected {
+                background-color: white;
+                border-bottom: none;
+                font-weight: bold;
+                color: #3949AB;
+            }
+            QTabBar::tab:!selected {
+                color: #666666;
+            }
+            QTabBar::tab:hover {
+                background-color: #E8EAF6;
             }
         """)
         
@@ -383,7 +422,8 @@ class PatientPanel(QMainWindow):
         self.measurements_table = QTableWidget()
         self.measurements_table.setColumnCount(5)
         self.measurements_table.setHorizontalHeaderLabels(["Tarih", "Saat", "Periyot", "Değer (mg/dL)", "Notlar"])
-        
+        self.measurements_table.setMinimumHeight(180)  # Yüksekliği artır
+        self.measurements_table.setRowCount(5)  # En az 5 satır göster
         measurements_table_layout.addWidget(self.measurements_table)
         
         # Blood glucose chart
@@ -533,6 +573,8 @@ class PatientPanel(QMainWindow):
         self.diet_table = QTableWidget()
         self.diet_table.setColumnCount(4)
         self.diet_table.setHorizontalHeaderLabels(["Tarih", "Diyet Türü", "Durum", "Notlar"])
+        self.diet_table.setMinimumHeight(180)
+        self.diet_table.setRowCount(5)
         
         diet_layout.addLayout(diet_form_layout)
         diet_layout.addWidget(diet_table_label)
@@ -668,6 +710,8 @@ class PatientPanel(QMainWindow):
         self.exercise_table = QTableWidget()
         self.exercise_table.setColumnCount(4)
         self.exercise_table.setHorizontalHeaderLabels(["Tarih", "Egzersiz Türü", "Durum", "Notlar"])
+        self.exercise_table.setMinimumHeight(180)
+        self.exercise_table.setRowCount(5)
         
         exercise_layout.addLayout(exercise_form_layout)
         exercise_layout.addWidget(exercise_table_label)
@@ -1009,7 +1053,6 @@ class PatientPanel(QMainWindow):
             profile_pic_label.setText("👤")
             profile_pic_label.setFont(QFont("Segoe UI", 40))
             profile_pic_label.setStyleSheet("color: #757575;")
-        
         profile_pic_label.setAlignment(Qt.AlignCenter)
         profile_pic_label.setFixedSize(100, 100)
         profile_pic_label.setStyleSheet("""
@@ -1019,6 +1062,36 @@ class PatientPanel(QMainWindow):
             border: 2px solid #E0E0E0;
         """)
         profile_layout.addWidget(profile_pic_label, 0, 0, 3, 1, Qt.AlignTop | Qt.AlignHCenter)
+
+        # Profil resmi güncelleme fonksiyonu
+        def update_profile_image():
+            file_dialog = QFileDialog()
+            file_dialog.setNameFilter("Resim Dosyaları (*.png *.jpg *.jpeg *.bmp)")
+            if file_dialog.exec_():
+                file_path = file_dialog.selectedFiles()[0]
+                pixmap = QPixmap(file_path)
+                if not pixmap.isNull():
+                    profile_pic_label.setPixmap(pixmap.scaled(100, 100, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                    with open(file_path, "rb") as f:
+                        image_bytes = f.read()
+                    try:
+                        DoctorController.update_patient_profile(
+                            self.patient.id,
+                            self.patient.name,
+                            self.patient.surname,
+                            self.patient.birthdate,
+                            self.patient.gender,
+                            self.patient.email,
+                            image_bytes,
+                            self.patient.diagnosis,
+                            self.patient.diabetes_type,
+                            self.patient.diagnosis_date
+                        )
+                        QMessageBox.information(self, "Başarılı", "Profil resmi güncellendi.")
+                        self.patient.profile_image = image_bytes
+                    except Exception as e:
+                        QMessageBox.warning(self, "Hata", f"Profil resmi güncellenemedi: {str(e)}")
+        profile_pic_label.mousePressEvent = lambda event: update_profile_image()
         
         # Basic info fields with styling
         tc_label = QLabel("TC Kimlik:")
@@ -1188,16 +1261,16 @@ class PatientPanel(QMainWindow):
         settings_layout.addStretch(1)
         
         # Add tabs to main layout
-        tabs.addTab(dashboard_tab, "Dashboard")
-        tabs.addTab(glucose_tab, "Kan Şekeri Ölçümü")
-        tabs.addTab(diet_exercise_tab, "Diyet ve Egzersiz")
-        tabs.addTab(symptoms_tab, "Belirti Takibi")
-        tabs.addTab(insulin_tab, "İnsülin Takibi")
-        tabs.addTab(settings_tab, "Ayarlar")
+        self.tabs.addTab(dashboard_tab, "Dashboard")
+        self.tabs.addTab(glucose_tab, "Kan Şekeri Ölçümü")
+        self.tabs.addTab(diet_exercise_tab, "Diyet ve Egzersiz")
+        self.tabs.addTab(symptoms_tab, "Belirti Takibi")
+        self.tabs.addTab(insulin_tab, "İnsülin Takibi")
+        self.tabs.addTab(settings_tab, "Ayarlar")
         
         # Add components to main layout
         main_layout.addWidget(top_panel)
-        main_layout.addWidget(tabs, 1)
+        main_layout.addWidget(self.tabs, 1)
         
         # Center window on screen
         self.center()
@@ -1267,7 +1340,8 @@ class PatientPanel(QMainWindow):
         # Period-based table
         periods_table = QTableWidget()
         periods_table.setColumnCount(3)
-        periods_table.setRowCount(5)
+        periods_table.setRowCount(5)  # En az 5 satır
+        periods_table.setMinimumHeight(180)  # Yüksekliği artır
         periods_table.setHorizontalHeaderLabels(["Periyot", "Zaman", "Değer (mg/dL)"])
         periods_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         periods_table.setStyleSheet("""
@@ -1617,12 +1691,12 @@ class PatientPanel(QMainWindow):
         """)
         measure_action.setIcon(QIcon("resources/icons/measurement.png"))
         measure_action.setIconSize(QSize(24, 24))
-        measure_action.clicked.connect(lambda: self.parentWidget().setCurrentIndex(1))  # Switch to glucose tab
+        measure_action.clicked.connect(lambda: self.tabs.setCurrentIndex(1))  # Switch to glucose tab
         
-        # Diet action
-        diet_action = QPushButton("Diyet Kaydet")
-        diet_action.setCursor(QCursor(Qt.PointingHandCursor))
-        diet_action.setStyleSheet("""
+        # Diet & Exercise action (merged)
+        diet_exercise_action = QPushButton("Diyet & Egzersiz Kaydet")
+        diet_exercise_action.setCursor(QCursor(Qt.PointingHandCursor))
+        diet_exercise_action.setStyleSheet("""
             QPushButton {
                 background-color: #4CAF50;
                 color: white;
@@ -1636,34 +1710,12 @@ class PatientPanel(QMainWindow):
                 background-color: #43A047;
             }
         """)
-        diet_action.setIcon(QIcon("resources/icons/diet.png"))
-        diet_action.setIconSize(QSize(24, 24))
-        diet_action.clicked.connect(lambda: self.parentWidget().setCurrentIndex(2))  # Switch to diet tab
-        
-        # Exercise action
-        exercise_action = QPushButton("Egzersiz Kaydet")
-        exercise_action.setCursor(QCursor(Qt.PointingHandCursor))
-        exercise_action.setStyleSheet("""
-            QPushButton {
-                background-color: #FF9800;
-                color: white;
-                border-radius: 5px;
-                padding: 15px;
-                font-weight: bold;
-                font-size: 14px;
-                text-align: center;
-            }
-            QPushButton:hover {
-                background-color: #F57C00;
-            }
-        """)
-        exercise_action.setIcon(QIcon("resources/icons/exercise.png"))
-        exercise_action.setIconSize(QSize(24, 24))
-        exercise_action.clicked.connect(lambda: self.parentWidget().setCurrentIndex(2))  # Switch to exercise tab
+        diet_exercise_action.setIcon(QIcon("resources/icons/diet.png"))
+        diet_exercise_action.setIconSize(QSize(24, 24))
+        diet_exercise_action.clicked.connect(lambda: self.tabs.setCurrentIndex(2))  # Switch to diet & exercise tab
         
         actions_layout.addWidget(measure_action)
-        actions_layout.addWidget(diet_action)
-        actions_layout.addWidget(exercise_action)
+        actions_layout.addWidget(diet_exercise_action)
         
         # Add components to dashboard
         self.dashboard_layout.addWidget(welcome_card)
@@ -1678,13 +1730,11 @@ class PatientPanel(QMainWindow):
         # Get last 10 measurements
         measurements = PatientController.get_patient_measurements(self.patient.id)
         recent_measurements = measurements[:10] if measurements else []
-        
-        self.measurements_table.setRowCount(len(recent_measurements))
-        
+        row_count = max(5, len(recent_measurements))
+        self.measurements_table.setRowCount(row_count)
         for i, m in enumerate(recent_measurements):
             self.measurements_table.setItem(i, 0, QTableWidgetItem(DateUtils.format_date(m['measurement_date'])))
             self.measurements_table.setItem(i, 1, QTableWidgetItem(DateUtils.format_time(m['measurement_time'])))
-            
             period_map = {
                 'morning': 'Sabah',
                 'noon': 'Öğle',
@@ -1693,19 +1743,15 @@ class PatientPanel(QMainWindow):
                 'night': 'Gece'
             }
             self.measurements_table.setItem(i, 2, QTableWidgetItem(period_map.get(m['period'], m['period'])))
-            
             value_item = QTableWidgetItem(str(m['glucose_level']))
-            # Color based on value
             if m['glucose_level'] < 70:
-                value_item.setForeground(QColor("#F44336"))  # Low - red
+                value_item.setForeground(QColor("#F44336"))
             elif m['glucose_level'] > 180:
-                value_item.setForeground(QColor("#FF9800"))  # High - orange
+                value_item.setForeground(QColor("#FF9800"))
             elif 70 <= m['glucose_level'] <= 110:
-                value_item.setForeground(QColor("#4CAF50"))  # Normal - green
-                
+                value_item.setForeground(QColor("#4CAF50"))
             self.measurements_table.setItem(i, 3, value_item)
             self.measurements_table.setItem(i, 4, QTableWidgetItem(m['notes'] or ""))
-        
         self.measurements_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
     
     def load_diets(self):
