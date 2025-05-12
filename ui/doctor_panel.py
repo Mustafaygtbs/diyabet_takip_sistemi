@@ -75,15 +75,25 @@ class DoctorPanel(QMainWindow):
                 border-bottom: none;
                 border-top-left-radius: 4px;
                 border-top-right-radius: 4px;
-                padding: 8px 16px;
+                padding: 8px 20px;
                 margin-right: 2px;
                 color: #666666;
+                min-width: 120px;
+                max-width: 160px;
+                text-align: center;
+                font-size: 15px;
             }
             QTabBar::tab:selected {
                 background-color: white;
                 border-bottom: none;
                 font-weight: bold;
                 color: #3949AB;
+            }
+            QTabBar::tab:!selected {
+                color: #666666;
+            }
+            QTabBar::tab:hover {
+                background-color: #E8EAF6;
             }
             QGroupBox {
                 border: 1px solid #E0E0E0;
@@ -1375,9 +1385,12 @@ class DoctorPanel(QMainWindow):
         # Add tabs
         tabs.addTab(summary_tab, "Özet")
         tabs.addTab(measurements_tab, "Ölçümler")
-        tabs.addTab(diet_exercise_tab, "Diyet ve Egzersiz")
+        tabs.addTab(diet_exercise_tab, "Diyet & Egzersiz")
         tabs.addTab(symptoms_tab, "Belirtiler")
         tabs.addTab(alerts_tab, "Uyarılar")
+        
+        # Sekme başlıklarını ortala
+        tabs.tabBar().setStyleSheet(tabs.styleSheet())
         
         self.patient_detail_layout.addWidget(tabs)
     

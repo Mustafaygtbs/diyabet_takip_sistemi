@@ -165,12 +165,12 @@ def setup_database():
         
         # Değişiklikleri kaydet
         connection.commit()
-        print("Veritabanı şeması başarıyla oluşturuldu")
+        # print("Veritabanı şeması başarıyla oluşturuldu")
         
     except (Exception, psycopg2.Error) as error:
         if connection:
             connection.rollback()
-        print("Veritabanı şeması oluşturulurken hata:", error)
+        # print("Veritabanı şeması oluşturulurken hata:", error)
         raise
     finally:
         if cursor:

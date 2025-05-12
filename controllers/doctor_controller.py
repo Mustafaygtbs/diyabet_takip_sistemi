@@ -269,8 +269,7 @@ class DoctorController:
             try:
                 EmailSender.send_email(email, subject, message)
             except Exception as e:
-                print(f"E-posta gönderme hatası: {e}")
-                # E-posta gönderilemese bile hasta kaydı oluşturuldu
+                pass  # E-posta gönderilemese bile hasta kaydı oluşturuldu
             
             return patient
             
@@ -405,6 +404,58 @@ class DoctorController:
             end_date = datetime.now().date()
             
         return DietQueries.get_diet_compliance_percentage(patient_id, start_date, end_date)
+    
+    @staticmethod
+    def update_patient_profile(patient_id, name, surname, birthdate, gender, email, profile_image, diagnosis, diabetes_type, diagnosis_date):
+        """
+        Hastanın profilini günceller.
+        :return: Başarılıysa hasta nesnesi, değilse None
+        """
+        # Hasta verisini al
+        patient_data = PatientQueries.get_patient_by_id(patient_id)
+        if not patient_data:
+            return None
+
+        # User tablosundaki id'yi al
+        user_id = patient_data['user_id']
+
+        # Patient nesnesi oluştur
+        patient = Patient()
+        patient.id = patient_id
+        patient.tc_id = patient_data['tc_id']
+        patient.name = name
+        patient.surname = surname
+        patient.birthdate = birthdate
+        patient.gender = gender
+        patient.email = email
+        patient.profile_image = profile_image if profile_image else patient_data['profile_image']
+        patient.doctor_id = patient_data['doctor_id']
+        patient.diagnosis = diagnosis
+        patient.diabetes_type = diabetes_type
+        patient.diagnosis_date = diagnosis_date
+
+        # User tablosunu güncelle
+        # User modelinin id'si user_id olmalı
+        from models.user import User
+        user = User()
+        user.id = user_id
+        user.name = name
+        user.surname = surname
+        user.birthdate = birthdate
+        user.gender = gender
+        user.email = email
+        user.profile_image = profile_image if profile_image else patient_data['profile_image']
+
+        updated_user_id = UserQueries.update_user(user)
+        if not updated_user_id:
+            return None
+
+        # Patient tablosunu güncelle
+        updated_patient_id = PatientQueries.update_patient(patient)
+        if not updated_patient_id:
+            return None
+
+        return patient
     
     def filter_patients(self):
         search_text = self.search_input.text().lower()

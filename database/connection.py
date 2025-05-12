@@ -35,10 +35,10 @@ class DatabaseConnection:
                max_connections,
                **self.db_config
            )
-           print("Veritabanı bağlantı havuzu başlatıldı")
+           # print("Veritabanı bağlantı havuzu başlatıldı")
            return True
        except (Exception, psycopg2.Error) as error:
-           print("Veritabanı bağlantı havuzu oluşturulurken hata:", error)
+           # print("Veritabanı bağlantı havuzu oluşturulurken hata:", error)
            return False    
    
    def get_connection(self):
@@ -47,22 +47,24 @@ class DatabaseConnection:
            if connection:
                return connection
        except (Exception, psycopg2.Error) as error:
-           print("Veritabanı bağlantısı alınırken hata:", error)
-       return None
+           # print("Veritabanı bağlantısı alınırken hata:", error)
+           return None
    
    def release_connection(self, connection):
        try:
            self.__connection_pool.putconn(connection)
        except (Exception, psycopg2.Error) as error:
-           print("Veritabanı bağlantısı serbest bırakılırken hata:", error)
+           # print("Veritabanı bağlantısı serbest bırakılırken hata:", error)
+           pass
    
    def close_all_connections(self):
        try:
            if self.__connection_pool:
                self.__connection_pool.closeall()
-               print("Tüm veritabanı bağlantıları kapatıldı")
+               # print("Tüm veritabanı bağlantıları kapatıldı")
        except (Exception, psycopg2.Error) as error:
-           print("Veritabanı bağlantıları kapatılırken hata:", error)
+           # print("Veritabanı bağlantıları kapatılırken hata:", error)
+           pass
    
    def execute_query(self, query, params=None, fetch=True):
     connection = None
@@ -81,7 +83,7 @@ class DatabaseConnection:
     except Exception as e:
         if connection:
             connection.rollback()
-        print(f"Sorgu hatası: {e}")
+        # print(f"Sorgu hatası: {e}")
         return None
     finally:
         if cursor:
@@ -108,7 +110,7 @@ class DatabaseConnection:
        except (Exception, psycopg2.Error) as error:
            if connection:
                connection.rollback()
-           print("Toplu sorgu çalıştırılırken hata:", error)
+           # print("Toplu sorgu çalıştırılırken hata:", error)
            raise
        finally:
            if cursor:
@@ -135,7 +137,7 @@ class DatabaseConnection:
        except (Exception, psycopg2.Error) as error:
            if connection:
                connection.rollback()
-           print("Çoklu değer eklenirken hata:", error)
+           # print("Çoklu değer eklenirken hata:", error)
            raise
        finally:
            if cursor:
@@ -156,10 +158,10 @@ class DatabaseConnection:
            cursor = connection.cursor()
            cursor.execute("SELECT version();")
            version = cursor.fetchone()
-           print("PostgreSQL versiyonu:", version)
+           # print("PostgreSQL versiyonu:", version)
            return True
        except (Exception, psycopg2.Error) as error:
-           print("Veritabanı bağlantısı test edilirken hata:", error)
+           # print("Veritabanı bağlantısı test edilirken hata:", error)
            return False
        finally:
            if cursor:

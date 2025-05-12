@@ -246,26 +246,18 @@ class MeasurementQueries:
             measurement.period, measurement.notes
         )
         
-        print(f"Sorgu: {query}")
-        print(f"Parametreler: {params}")
-        
         db = DatabaseConnection.get_instance()
         connection = None
         cursor = None
         
         try:
             connection = db.get_connection()
-            print(f"Bağlantı durumu: {connection is not None}")
             cursor = connection.cursor()
             
             cursor.execute(query, params)
             result = cursor.fetchone()
             
-            print(f"Sorgu sonucu: {result}")
-            
-            # Önemli: Commit işlemini burada yap
             connection.commit()
-            print("Transaction başarıyla commit edildi")
             
             return result[0] if result else None
         except Exception as e:
