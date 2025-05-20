@@ -14,11 +14,19 @@ class AlertWidget(QWidget):
     def __init__(self, alert_data, parent=None):
         super().__init__(parent)
         self.alert_data = alert_data
+        self._main_layout = QVBoxLayout()
+        self.setLayout(self._main_layout)
         self.initUI()
     
     def initUI(self):
-        layout = QVBoxLayout()
-        self.setLayout(layout)
+        # Layout'u temizle
+        while self._main_layout.count():
+            item = self._main_layout.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.deleteLater()
+            elif item.layout():
+                self.clear_layout(item.layout())
         
         # Alert container
         alert_type = self.alert_data['alert_type']
@@ -90,13 +98,13 @@ class AlertWidget(QWidget):
         date_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         header_layout.addWidget(date_label)
         
-        layout.addLayout(header_layout)
+        self._main_layout.addLayout(header_layout)
         
         # Alert message
         message_label = QLabel(self.alert_data['message'])
         message_label.setWordWrap(True)
         message_label.setStyleSheet("color: #333333; margin-top: 5px;")
-        layout.addWidget(message_label)
+        self._main_layout.addWidget(message_label)
         
         # Action buttons
         if not self.alert_data['is_read']:
@@ -124,7 +132,7 @@ class AlertWidget(QWidget):
             action_layout.addStretch(1)
             action_layout.addWidget(read_button)
             
-            layout.addLayout(action_layout)
+            self._main_layout.addLayout(action_layout)
     
     def get_alert_type_name(self):
         """Get display name for alert type."""
@@ -161,3 +169,12 @@ class AlertWidget(QWidget):
             
             # Update UI
             self.initUI()
+
+    def clear_layout(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.deleteLater()
+            elif item.layout():
+                self.clear_layout(item.layout())

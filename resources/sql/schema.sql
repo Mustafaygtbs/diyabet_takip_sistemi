@@ -1,4 +1,3 @@
-
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     tc_id VARCHAR(11) UNIQUE NOT NULL,
@@ -112,7 +111,18 @@ CREATE TABLE IF NOT EXISTS insulins (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- İndeksler
+-- Manuel doktor öneri tablosu
+CREATE TABLE IF NOT EXISTS manual_recommendations (
+    id SERIAL PRIMARY KEY,
+    doctor_id INTEGER NOT NULL REFERENCES doctors(id) ON DELETE CASCADE,
+    patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+    recommendation_type VARCHAR(20) NOT NULL CHECK (recommendation_type IN ('diet', 'exercise', 'insulin', 'other')),
+    content TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- İnseksler
 CREATE INDEX IF NOT EXISTS idx_measurements_patient_id ON measurements(patient_id);
 CREATE INDEX IF NOT EXISTS idx_measurements_date ON measurements(measurement_date);
 CREATE INDEX IF NOT EXISTS idx_exercises_patient_id ON exercises(patient_id);

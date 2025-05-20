@@ -25,7 +25,7 @@ class DataSeeder:
         """
         Admin doktor ekler (eğer yoksa).
         """
-        admin_tc = "12345678910"  # Admin doktor TC
+        admin_tc = "35173539804"  # Admin doktor TC
         
         # Kullanıcı zaten var mı kontrol et
         db = DatabaseConnection.get_instance()
@@ -54,12 +54,12 @@ class DataSeeder:
                 RETURNING id;
             """, (
                 admin_tc,
-                AuthController.hash_password("admin123"),
+                AuthController.hash_password("mustafa"),
                 "Admin",
                 "Doktor",
                 date(1980, 1, 1),
                 "E",
-                "admin@diyabet.com",
+                "mustafaygtbs@gmail.com",
                 None,
                 "doctor"
             ))

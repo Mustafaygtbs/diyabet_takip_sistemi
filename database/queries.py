@@ -671,3 +671,42 @@ class InsulinQueries:
         db = DatabaseConnection.get_instance()
         return db.execute_query(query, (patient_id, start_date, end_date))
 
+
+class ManualRecommendationQueries:
+    @staticmethod
+    def insert_manual_recommendation(recommendation):
+        query = """
+        INSERT INTO manual_recommendations (doctor_id, patient_id, recommendation_type, content, created_at, updated_at)
+        VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        RETURNING id;
+        """
+        params = (
+            recommendation.doctor_id,
+            recommendation.patient_id,
+            recommendation.recommendation_type,
+            recommendation.content
+        )
+        db = DatabaseConnection.get_instance()
+        result = db.execute_query(query, params)
+        return result[0][0] if result else None
+
+    @staticmethod
+    def get_manual_recommendations_by_patient(patient_id):
+        query = """
+        SELECT * FROM manual_recommendations WHERE patient_id = %s ORDER BY created_at DESC;
+        """
+        db = DatabaseConnection.get_instance()
+        results = db.execute_query(query, (patient_id,))
+        from models.manual_recommendation import ManualRecommendation
+        return [ManualRecommendation.from_dict(dict(row)) for row in results] if results else []
+
+    @staticmethod
+    def get_manual_recommendations_by_doctor(doctor_id):
+        query = """
+        SELECT * FROM manual_recommendations WHERE doctor_id = %s ORDER BY created_at DESC;
+        """
+        db = DatabaseConnection.get_instance()
+        results = db.execute_query(query, (doctor_id,))
+        from models.manual_recommendation import ManualRecommendation
+        return [ManualRecommendation.from_dict(dict(row)) for row in results] if results else []
+

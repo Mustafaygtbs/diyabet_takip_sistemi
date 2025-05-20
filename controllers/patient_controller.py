@@ -17,10 +17,8 @@ class PatientController:
     @staticmethod
     def get_patient_by_id(patient_id):
         patient_data = PatientQueries.get_patient_by_id(patient_id)
-        
         if not patient_data:
             return None
-        
         patient = Patient()
         patient.id = patient_data['id']
         patient.tc_id = patient_data['tc_id']
@@ -35,7 +33,6 @@ class PatientController:
         patient.diagnosis = patient_data['diagnosis']
         patient.diabetes_type = patient_data['diabetes_type']
         patient.diagnosis_date = patient_data['diagnosis_date']
-        
         return patient
     
     @staticmethod
@@ -328,3 +325,11 @@ class PatientController:
             return SymptomQueries.get_symptoms_by_date_range(patient_id, start_date, end_date)
         else:
             return SymptomQueries.get_symptoms_by_patient_id(patient_id)
+    
+    @staticmethod
+    def get_manual_recommendations(patient_id):
+        """
+        Hastanın manuel doktor önerilerini getirir.
+        """
+        from controllers.doctor_controller import DoctorController
+        return DoctorController.get_manual_recommendations_by_patient(patient_id)

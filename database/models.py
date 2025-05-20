@@ -138,6 +138,18 @@ def setup_database():
         );
         """
         
+        create_manual_recommendations_table = """
+        CREATE TABLE IF NOT EXISTS manual_recommendations (
+            id SERIAL PRIMARY KEY,
+            doctor_id INTEGER NOT NULL REFERENCES doctors(id) ON DELETE CASCADE,
+            patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+            recommendation_type VARCHAR(20) NOT NULL CHECK (recommendation_type IN ('diet', 'exercise', 'insulin', 'other')),
+            content TEXT NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+        """
+        
         # Create indices
         create_indices = """
         CREATE INDEX IF NOT EXISTS idx_measurements_patient_id ON measurements(patient_id);
@@ -161,6 +173,7 @@ def setup_database():
         cursor.execute(create_symptoms_table)
         cursor.execute(create_alerts_table)
         cursor.execute(create_insulins_table)
+        cursor.execute(create_manual_recommendations_table)
         cursor.execute(create_indices)
         
         # Değişiklikleri kaydet

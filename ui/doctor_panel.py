@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                             QTextEdit, QRadioButton, QButtonGroup, QCheckBox,
                             QSpacerItem, QSizePolicy, QScrollArea, QListWidget,
                             QListWidgetItem, QGridLayout, QDialog, QFileDialog,
-                            QGroupBox) 
+                            QGroupBox, QSpinBox) 
 from PyQt5.QtGui import QIcon, QPixmap, QFont, QColor, QPalette
 from PyQt5.QtCore import Qt, QDate
 
@@ -304,9 +304,6 @@ class DoctorPanel(QMainWindow):
         """)
         self.search_input.textChanged.connect(self.filter_patients)
         
-        search_layout.addWidget(search_label)
-        search_layout.addWidget(self.search_input)
-        
         # Patient list
         self.patient_list = QListWidget()
         self.patient_list.setStyleSheet("""
@@ -331,6 +328,7 @@ class DoctorPanel(QMainWindow):
                 background-color: #F5F5F5;
             }
         """)
+        self.patient_list.setFixedWidth(210)
         self.patient_list.currentItemChanged.connect(self.on_patient_selected)
         
         left_layout.addWidget(list_header)
@@ -436,19 +434,16 @@ class DoctorPanel(QMainWindow):
     
     def filter_patients(self):
         search_text = self.search_input.text().lower()
-        
         for i in range(self.patient_list.count()):
             item = self.patient_list.item(i)
             patient_id = item.data(Qt.UserRole)
             patient = PatientController.get_patient_by_id(patient_id)
-            
-            # Search by name, TC ID or diagnosis
-            if (search_text in f"{patient.name} {patient.surname}".lower() or
+            matches_search = (
+                search_text in f"{patient.name} {patient.surname}".lower() or
                 search_text in patient.tc_id.lower() or
-                (patient.diagnosis and search_text in patient.diagnosis.lower())):
-                item.setHidden(False)
-            else:
-                item.setHidden(True)
+                (patient.diagnosis and search_text in patient.diagnosis.lower())
+            )
+            item.setHidden(not matches_search)
     
     def open_patient_form(self):
         dialog = PatientFormDialog(self.doctor.id)
@@ -465,12 +460,12 @@ class DoctorPanel(QMainWindow):
         self.patient_detail_stack.setCurrentIndex(1)  # Patient detail page
     
     def load_patient_details(self, patient_id):
+
         # Clear existing content
         for i in reversed(range(self.patient_detail_layout.count())):
             widget = self.patient_detail_layout.itemAt(i).widget()
             if widget:
                 widget.deleteLater()
-        
         # Load patient
         patient = PatientController.get_patient_by_id(patient_id)
         
@@ -675,6 +670,20 @@ class DoctorPanel(QMainWindow):
         end_date_edit.setDate(QDate.currentDate())
         filter_layout.addWidget(end_date_edit)
         
+        filter_layout.addWidget(QLabel("Min. Değer (mg/dL):"))
+        min_value_spin = QSpinBox()
+        min_value_spin.setRange(0, 1000)
+        min_value_spin.setValue(0)
+        min_value_spin.setFixedWidth(100)
+        filter_layout.addWidget(min_value_spin)
+
+        filter_layout.addWidget(QLabel("Maks. Değer (mg/dL):"))
+        max_value_spin = QSpinBox()
+        max_value_spin.setRange(0, 1000)
+        max_value_spin.setValue(1000)
+        max_value_spin.setFixedWidth(100)
+        filter_layout.addWidget(max_value_spin)
+        
         filter_button = QPushButton("Filtrele")
         filter_button.setStyleSheet("""
             QPushButton {
@@ -707,9 +716,11 @@ class DoctorPanel(QMainWindow):
         def load_filtered_measurements():
             start_date = start_date_edit.date().toPyDate()
             end_date = end_date_edit.date().toPyDate()
-            
+            min_value = min_value_spin.value()
+            max_value = max_value_spin.value()
             filtered_measurements = DoctorController.get_patient_measurements(patient.id, start_date, end_date)
-            
+            # Kan şekeri aralığına göre filtrele
+            filtered_measurements = [m for m in filtered_measurements if min_value <= m['glucose_level'] <= max_value]
             measurements_full_table.setRowCount(len(filtered_measurements))
             
             for i, m in enumerate(filtered_measurements):
@@ -1378,7 +1389,77 @@ class DoctorPanel(QMainWindow):
         
         load_filtered_alerts()  # Initial load
         
-        # ui/doctor_panel.py (continued)
+        # Manuel Öneri tab
+        manual_recommendation_tab = QWidget()
+        manual_layout = QVBoxLayout()
+        manual_recommendation_tab.setLayout(manual_layout)
+
+        # Öneri ekleme formu
+        form_group = QGroupBox("Yeni Manuel Öneri Ekle")
+        form_layout = QHBoxLayout()
+        form_group.setLayout(form_layout)
+
+        type_label = QLabel("Öneri Türü:")
+        type_combo = QComboBox()
+        type_combo.addItem("Diyet", "diet")
+        type_combo.addItem("Egzersiz", "exercise")
+        type_combo.addItem("İnsülin", "insulin")
+        type_combo.addItem("Diğer", "other")
+        form_layout.addWidget(type_label)
+        form_layout.addWidget(type_combo)
+
+        content_label = QLabel("İçerik:")
+        content_edit = QTextEdit()
+        content_edit.setPlaceholderText("Öneri metni giriniz...")
+        content_edit.setFixedHeight(60)
+        form_layout.addWidget(content_label)
+        form_layout.addWidget(content_edit)
+
+        add_button = QPushButton("Kaydet")
+        add_button.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold; border-radius: 5px; padding: 8px 15px;")
+        form_layout.addWidget(add_button)
+
+        manual_layout.addWidget(form_group)
+
+        # Geçmiş öneriler tablosu
+        table_group = QGroupBox("Geçmiş Manuel Öneriler")
+        table_layout = QVBoxLayout()
+        table_group.setLayout(table_layout)
+        manual_table = QTableWidget()
+        manual_table.setColumnCount(4)
+        manual_table.setHorizontalHeaderLabels(["Tarih", "Tür", "İçerik", "Doktor"])
+        table_layout.addWidget(manual_table)
+        manual_layout.addWidget(table_group)
+
+        def load_manual_recommendations():
+            recommendations = DoctorController.get_manual_recommendations_by_patient(patient.id)
+            manual_table.setRowCount(len(recommendations))
+            for i, rec in enumerate(recommendations):
+                manual_table.setItem(i, 0, QTableWidgetItem(rec.created_at.strftime("%Y-%m-%d %H:%M")))
+                type_map = {"diet": "Diyet", "exercise": "Egzersiz", "insulin": "İnsülin", "other": "Diğer"}
+                manual_table.setItem(i, 1, QTableWidgetItem(type_map.get(rec.recommendation_type, rec.recommendation_type)))
+                manual_table.setItem(i, 2, QTableWidgetItem(rec.content))
+                # Doktor adı için (gerekirse sorgu eklenebilir, burada sadece doktor_id gösteriyoruz)
+                manual_table.setItem(i, 3, QTableWidgetItem(str(rec.doctor_id)))
+            manual_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
+        def add_manual_recommendation():
+            rec_type = type_combo.currentData()
+            content = content_edit.toPlainText().strip()
+            if not content:
+                QMessageBox.warning(self, "Uyarı", "Öneri metni boş olamaz.")
+                return
+            DoctorController.add_manual_recommendation(self.doctor.id, patient.id, rec_type, content)
+            content_edit.clear()
+            load_manual_recommendations()
+            QMessageBox.information(self, "Başarılı", "Manuel öneri kaydedildi.")
+
+        add_button.clicked.connect(add_manual_recommendation)
+        load_manual_recommendations()
+
+        # Sekmeye ekle
+        tabs.addTab(manual_recommendation_tab, "Manuel Öneri")
+        
         # Add patient detail components
         self.patient_detail_layout.addWidget(header)
         
@@ -1403,8 +1484,22 @@ class DoctorPanel(QMainWindow):
             self.load_patients()
     
     def on_alert_read(self):
-        # Refresh patient list when an alert is marked as read
+        # Seçili hastanın ID'sini kaydet
+        current_item = self.patient_list.currentItem()
+        selected_patient_id = current_item.data(Qt.UserRole) if current_item else None
+
+        # Hasta listesini güncelle
         self.load_patients()
+
+        # Seçili hastayı tekrar seç
+        if selected_patient_id is not None:
+            for i in range(self.patient_list.count()):
+                item = self.patient_list.item(i)
+                if item.data(Qt.UserRole) == selected_patient_id:
+                    self.patient_list.setCurrentItem(item)
+                    self.load_patient_details(selected_patient_id)
+                    self.patient_detail_stack.setCurrentIndex(1)
+                    break
         
 
         

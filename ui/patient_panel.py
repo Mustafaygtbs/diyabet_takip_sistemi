@@ -1718,6 +1718,29 @@ class PatientPanel(QMainWindow):
         actions_layout.addWidget(measure_action)
         actions_layout.addWidget(diet_exercise_action)
         
+        # Manuel Doktor Önerileri
+        manual_group = QGroupBox("Doktorunuzun Size Özel Manuel Önerileri")
+        manual_layout = QVBoxLayout()
+        manual_group.setLayout(manual_layout)
+        manual_table = QTableWidget()
+        manual_table.setColumnCount(3)
+        manual_table.setHorizontalHeaderLabels(["Tarih", "Tür", "İçerik"])
+        manual_layout.addWidget(manual_table)
+        today_layout.addWidget(manual_group)
+
+        def load_manual_recommendations():
+            from controllers.doctor_controller import DoctorController
+            recommendations = DoctorController.get_manual_recommendations_by_patient(self.patient.id)
+            manual_table.setRowCount(len(recommendations))
+            for i, rec in enumerate(recommendations):
+                manual_table.setItem(i, 0, QTableWidgetItem(rec.created_at.strftime("%Y-%m-%d %H:%M")))
+                type_map = {"diet": "Diyet", "exercise": "Egzersiz", "insulin": "İnsülin", "other": "Diğer"}
+                manual_table.setItem(i, 1, QTableWidgetItem(type_map.get(rec.recommendation_type, rec.recommendation_type)))
+                manual_table.setItem(i, 2, QTableWidgetItem(rec.content))
+            manual_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
+        load_manual_recommendations()
+        
         # Add components to dashboard
         self.dashboard_layout.addWidget(welcome_card)
         self.dashboard_layout.addWidget(actions_group)

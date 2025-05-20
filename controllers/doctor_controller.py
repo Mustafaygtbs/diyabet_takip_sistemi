@@ -7,7 +7,7 @@ from models.patient import Patient
 from models.user import User
 from database.queries import (
     UserQueries, DoctorQueries, PatientQueries, 
-    MeasurementQueries, ExerciseQueries, DietQueries, SymptomQueries, AlertQueries
+    MeasurementQueries, ExerciseQueries, DietQueries, SymptomQueries, AlertQueries, ManualRecommendationQueries
 )
 from controllers.auth_controller import AuthController
 from utils.email_sender import EmailSender
@@ -471,3 +471,24 @@ class DoctorController:
                 item.setHidden(False)
             else:
                 item.setHidden(True)
+
+    @staticmethod
+    def add_manual_recommendation(doctor_id, patient_id, recommendation_type, content):
+        """
+        Doktorun hastaya manuel öneri eklemesini sağlar.
+        """
+        from models.manual_recommendation import ManualRecommendation
+        recommendation = ManualRecommendation(
+            doctor_id=doctor_id,
+            patient_id=patient_id,
+            recommendation_type=recommendation_type,
+            content=content
+        )
+        return ManualRecommendationQueries.insert_manual_recommendation(recommendation)
+
+    @staticmethod
+    def get_manual_recommendations_by_patient(patient_id):
+        """
+        Hastanın tüm manuel doktor önerilerini getirir.
+        """
+        return ManualRecommendationQueries.get_manual_recommendations_by_patient(patient_id)
