@@ -1,4 +1,3 @@
-# main.py
 import sys
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon
@@ -12,17 +11,16 @@ def main():
     app.setWindowIcon(QIcon("resources/medical-check.png"))  
     
     try:
-        # db bağlantısı kur
+
         db = DatabaseConnection.get_instance()
         
-        #  db test
+
         if not db.test_connection():
             raise Exception("Veritabanı bağlantısı kurulamadı.")
         
-        # db şema 
+
         setup_database()
         
-        # başlangıç verilerini ekle 
         DataSeeder.seed_database()
         
         # Giriş ekranını göster

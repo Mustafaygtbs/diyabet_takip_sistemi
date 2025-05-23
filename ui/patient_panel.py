@@ -1,4 +1,4 @@
-# ui/patient_panel.py
+ 
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
                             QLabel, QPushButton, QTabWidget, QTableWidget,
                             QTableWidgetItem, QFrame, QSplitter, QComboBox,

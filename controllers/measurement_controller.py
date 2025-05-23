@@ -10,10 +10,7 @@ class MeasurementController:
     def calculate_daily_average_and_recommend_insulin(patient_id, date=None):
         """
         Günlük ölçüm ortalamasını hesaplar ve insülin önerir.
-        
-        :param patient_id: Hasta ID
-        :param date: Tarih (varsayılan: bugün)
-        :return: Önerilen insülin dozu
+
         """
         if not date:
             date = datetime.now().date()
@@ -60,9 +57,7 @@ class MeasurementController:
     def _calculate_average_glucose(periods):
         """
         Periyotlara göre ortalama kan şekeri hesaplar.
-        
-        :param periods: Periyot bazlı ölçüm değerleri
-        :return: Ortalama kan şekeri
+
         """
         total = 0
         count = 0

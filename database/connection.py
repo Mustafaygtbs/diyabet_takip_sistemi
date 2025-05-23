@@ -131,10 +131,7 @@ class DatabaseConnection:
     def execute_batch(self, query, params_list):
         """
         Toplu SQL sorgusu çalıştırır.
-        
-        :param query: Çalıştırılacak SQL sorgusu şablonu
-        :param params_list: Her sorgu için parametreler listesi
-        :return: Etkilenen satır sayısı
+
         """
         connection = None
         cursor = None
@@ -158,10 +155,7 @@ class DatabaseConnection:
     def execute_values(self, query, params_list):
         """
         Çoklu değer ekleme SQL sorgusu çalıştırır.
-        
-        :param query: Çalıştırılacak SQL sorgusu şablonu
-        :param params_list: Eklenecek değerler listesi
-        :return: Etkilenen satır sayısı
+
         """
         connection = None
         cursor = None
@@ -185,8 +179,7 @@ class DatabaseConnection:
     def test_connection(self):
         """
         Veritabanı bağlantısını test eder.
-        
-        :return: Bağlantı başarılı ise True, değilse False
+
         """
         connection = None
         cursor = None

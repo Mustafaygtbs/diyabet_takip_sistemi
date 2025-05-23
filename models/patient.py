@@ -1,4 +1,3 @@
-# models/patient.py
 from datetime import datetime
 from models.user import User
 
@@ -11,7 +10,7 @@ class Patient(User):
                          email, profile_image, 'patient', id)
         self.doctor_id = doctor_id
         self.diagnosis = diagnosis
-        self.diabetes_type = diabetes_type  # 'Tip 1', 'Tip 2', 'Gestasyonel', vb.
+        self.diabetes_type = diabetes_type  
         self.diagnosis_date = diagnosis_date
         self.measurements = []
         self.exercises = []

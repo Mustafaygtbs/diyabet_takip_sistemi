@@ -2,13 +2,13 @@
 from datetime import datetime
 
 class Alert:
-    TYPE_HYPOGLYCEMIA = 'hypoglycemia'  # Düşük kan şekeri
-    TYPE_NORMAL = 'normal'  # Normal kan şekeri
-    TYPE_MEDIUM_HIGH = 'medium_high'  # Orta yüksek kan şekeri
-    TYPE_HIGH = 'high'  # Yüksek kan şekeri
-    TYPE_HYPERGLYCEMIA = 'hyperglycemia'  # Çok yüksek kan şekeri
-    TYPE_MISSING_MEASUREMENT = 'missing_measurement'  # Ölçüm eksikliği
-    TYPE_INSUFFICIENT_MEASUREMENT = 'insufficient_measurement'  # Yetersiz ölçüm
+    TYPE_HYPOGLYCEMIA = 'hypoglycemia'  
+    TYPE_NORMAL = 'normal'  
+    TYPE_MEDIUM_HIGH = 'medium_high' 
+    TYPE_HIGH = 'high'  
+    TYPE_HYPERGLYCEMIA = 'hyperglycemia'  
+    TYPE_MISSING_MEASUREMENT = 'missing_measurement'  
+    TYPE_INSUFFICIENT_MEASUREMENT = 'insufficient_measurement'  
     
     TYPES = [
         TYPE_HYPOGLYCEMIA,
@@ -26,7 +26,7 @@ class Alert:
         self.patient_id = patient_id
         self.alert_type = alert_type
         self.message = message
-        self.glucose_level = glucose_level  # Uyarıya neden olan ölçüm değeri
+        self.glucose_level = glucose_level  
         self.date = date or datetime.now()
         self.is_read = is_read
         self.created_at = datetime.now()

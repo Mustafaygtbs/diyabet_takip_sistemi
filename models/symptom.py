@@ -1,15 +1,15 @@
-# models/symptom.py
+ 
 from datetime import datetime
 
 class Symptom:
-    TYPE_POLYURIA = 'polyuria'  # Sık idrara çıkma
-    TYPE_POLYPHAGIA = 'polyphagia'  # Aşırı açlık hissi
-    TYPE_POLYDIPSIA = 'polydipsia'  # Aşırı susama hissi
-    TYPE_NEUROPATHY = 'neuropathy'  # El ve ayaklarda karıncalanma
-    TYPE_WEIGHT_LOSS = 'weight_loss'  # Kilo kaybı
-    TYPE_FATIGUE = 'fatigue'  # Yorgunluk
-    TYPE_SLOW_HEALING = 'slow_healing'  # Yaraların yavaş iyileşmesi
-    TYPE_BLURRED_VISION = 'blurred_vision'  # Bulanık görme
+    TYPE_POLYURIA = 'polyuria'  
+    TYPE_POLYPHAGIA = 'polyphagia'  
+    TYPE_POLYDIPSIA = 'polydipsia'  
+    TYPE_NEUROPATHY = 'neuropathy'  
+    TYPE_WEIGHT_LOSS = 'weight_loss'  
+    TYPE_FATIGUE = 'fatigue'  
+    TYPE_SLOW_HEALING = 'slow_healing'  
+    TYPE_BLURRED_VISION = 'blurred_vision'  
     
     TYPES = [
         TYPE_POLYURIA,
@@ -27,7 +27,7 @@ class Symptom:
         self.id = id
         self.patient_id = patient_id
         self.symptom_type = symptom_type
-        self.severity = severity  # 1-5 arası şiddet
+        self.severity = severity  
         self.date = date or datetime.now()
         self.notes = notes
         self.created_at = datetime.now()

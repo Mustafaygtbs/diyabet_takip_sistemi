@@ -1,4 +1,3 @@
-# ui/login_window.py
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
                             QLabel, QLineEdit, QPushButton, QMessageBox,
                             QFrame, QFormLayout)

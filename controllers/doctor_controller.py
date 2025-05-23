@@ -18,8 +18,6 @@ class DoctorController:
                         profile_image, specialty, hospital):
         """
         Doktor kaydeder.
-        
-        :return: Başarılıysa doktor nesnesi, değilse None
         """
         # Kullanıcı nesnesi oluştur
         doctor = Doctor()
@@ -54,8 +52,7 @@ class DoctorController:
                              profile_image, specialty, hospital):
         """
         Doktor profilini günceller.
-        
-        :return: Başarılıysa doktor nesnesi, değilse None
+
         """
         # Doktor verisini al
         doctor_data = DoctorQueries.get_doctor_by_id(doctor_id)
@@ -94,9 +91,7 @@ class DoctorController:
     def get_doctor_by_id(doctor_id):
         """
         ID'ye göre doktor getirir.
-        
-        :param doctor_id: Doktor ID
-        :return: Doktor nesnesi veya None
+
         """
         doctor_data = DoctorQueries.get_doctor_by_id(doctor_id)
         
@@ -122,9 +117,7 @@ class DoctorController:
     def get_doctor_patients(doctor_id):
         """
         Doktorun hastalarını getirir.
-        
-        :param doctor_id: Doktor ID
-        :return: Hasta nesnelerinin listesi
+
         """
         patients_data = DoctorQueries.get_doctor_patients(doctor_id)
         
@@ -157,8 +150,7 @@ class DoctorController:
                         profile_image, diagnosis, diabetes_type, diagnosis_date):
         """
         Hasta kaydeder.
-        
-        :return: Başarılıysa hasta nesnesi, değilse None
+
         """
         db = DatabaseConnection.get_instance()
         connection = None
@@ -291,11 +283,6 @@ class DoctorController:
     def get_patient_measurements(patient_id, start_date=None, end_date=None):
         """
         Hastanın ölçümlerini getirir.
-        
-        :param patient_id: Hasta ID
-        :param start_date: Başlangıç tarihi (opsiyonel)
-        :param end_date: Bitiş tarihi (opsiyonel)
-        :return: Ölçüm listesi
         """
         if start_date and end_date:
             return MeasurementQueries.get_measurements_by_date_range(patient_id, start_date, end_date)
@@ -306,11 +293,7 @@ class DoctorController:
     def get_patient_exercises(patient_id, start_date=None, end_date=None):
         """
         Hastanın egzersizlerini getirir.
-        
-        :param patient_id: Hasta ID
-        :param start_date: Başlangıç tarihi (opsiyonel)
-        :param end_date: Bitiş tarihi (opsiyonel)
-        :return: Egzersiz listesi
+
         """
         if start_date and end_date:
             return ExerciseQueries.get_exercises_by_date_range(patient_id, start_date, end_date)
@@ -321,11 +304,7 @@ class DoctorController:
     def get_patient_diets(patient_id, start_date=None, end_date=None):
         """
         Hastanın diyet planlarını getirir.
-        
-        :param patient_id: Hasta ID
-        :param start_date: Başlangıç tarihi (opsiyonel)
-        :param end_date: Bitiş tarihi (opsiyonel)
-        :return: Diyet listesi
+
         """
         if start_date and end_date:
             return DietQueries.get_diets_by_date_range(patient_id, start_date, end_date)
@@ -336,12 +315,7 @@ class DoctorController:
     def get_patient_symptoms(patient_id, start_date=None, end_date=None, symptom_type=None):
         """
         Hastanın belirtilerini getirir.
-        
-        :param patient_id: Hasta ID
-        :param start_date: Başlangıç tarihi (opsiyonel)
-        :param end_date: Bitiş tarihi (opsiyonel)
-        :param symptom_type: Belirti türü (opsiyonel)
-        :return: Belirti listesi
+
         """
         if symptom_type:
             return SymptomQueries.get_symptoms_by_type(patient_id, symptom_type)
@@ -354,13 +328,7 @@ class DoctorController:
     def get_patient_alerts(patient_id, start_date=None, end_date=None, alert_type=None, only_unread=False):
         """
         Hastanın uyarılarını getirir.
-        
-        :param patient_id: Hasta ID
-        :param start_date: Başlangıç tarihi (opsiyonel)
-        :param end_date: Bitiş tarihi (opsiyonel)
-        :param alert_type: Uyarı türü (opsiyonel)
-        :param only_unread: Sadece okunmamış uyarılar (opsiyonel)
-        :return: Uyarı listesi
+
         """
         if only_unread:
             return AlertQueries.get_unread_alerts_by_patient_id(patient_id)
@@ -375,11 +343,7 @@ class DoctorController:
     def get_exercise_compliance(patient_id, start_date=None, end_date=None):
         """
         Hastanın egzersiz uyum yüzdesini hesaplar.
-        
-        :param patient_id: Hasta ID
-        :param start_date: Başlangıç tarihi (opsiyonel)
-        :param end_date: Bitiş tarihi (opsiyonel)
-        :return: Uyum yüzdesi (0-100)
+
         """
         if not start_date:
             start_date = datetime.now().date() - timedelta(days=30)
@@ -392,11 +356,7 @@ class DoctorController:
     def get_diet_compliance(patient_id, start_date=None, end_date=None):
         """
         Hastanın diyet uyum yüzdesini hesaplar.
-        
-        :param patient_id: Hasta ID
-        :param start_date: Başlangıç tarihi (opsiyonel)
-        :param end_date: Bitiş tarihi (opsiyonel)
-        :return: Uyum yüzdesi (0-100)
+
         """
         if not start_date:
             start_date = datetime.now().date() - timedelta(days=30)
@@ -409,7 +369,7 @@ class DoctorController:
     def update_patient_profile(patient_id, name, surname, birthdate, gender, email, profile_image, diagnosis, diabetes_type, diagnosis_date):
         """
         Hastanın profilini günceller.
-        :return: Başarılıysa hasta nesnesi, değilse None
+
         """
         # Hasta verisini al
         patient_data = PatientQueries.get_patient_by_id(patient_id)

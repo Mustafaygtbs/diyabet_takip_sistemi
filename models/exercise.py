@@ -1,4 +1,4 @@
-# models/exercise.py
+
 from datetime import datetime
 
 class Exercise:

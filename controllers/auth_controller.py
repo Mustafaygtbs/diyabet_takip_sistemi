@@ -12,9 +12,6 @@ class AuthController:
     def hash_password(password):
         """
         Şifreyi güvenli bir şekilde hash'ler.
-        
-        :param password: Hash'lenecek şifre
-        :return: Hash'lenmiş şifre
         """
         # Salt oluşturma
         salt = hashlib.sha256(os.urandom(60)).hexdigest().encode('ascii')
@@ -44,10 +41,6 @@ class AuthController:
     def login(tc_id, password):
         """
         Kullanıcı girişi yapar.
-        
-        :param tc_id: TC kimlik numarası
-        :param password: Şifre
-        :return: Başarılıysa kullanıcı nesnesi, değilse None
         """
         user_data = UserQueries.get_user_by_tc_id(tc_id)
         

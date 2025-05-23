@@ -1,4 +1,4 @@
-# models/doctor.py
+
 from models.user import User
 
 class Doctor(User):

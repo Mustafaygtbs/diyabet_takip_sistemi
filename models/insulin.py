@@ -1,4 +1,4 @@
-# models/insulin.py
+ 
 from datetime import datetime
 
 class Insulin:
@@ -6,9 +6,9 @@ class Insulin:
                  average_glucose=None, date=None, notes=None, id=None):
         self.id = id
         self.patient_id = patient_id
-        self.recommended_dose = recommended_dose  # ml cinsinden
-        self.administered_dose = administered_dose  # Uygulanan doz (ml)
-        self.average_glucose = average_glucose  # Ortalama kan şekeri (mg/dL)
+        self.recommended_dose = recommended_dose  
+        self.administered_dose = administered_dose  
+        self.average_glucose = average_glucose  
         self.date = date or datetime.now()
         self.notes = notes
         self.created_at = datetime.now()
@@ -19,15 +19,15 @@ class Insulin:
         if average_glucose is None:
             return None
         if average_glucose < 70:
-            return 0  # Hipoglisemi - insülin yok
+            return 0  
         elif 70 <= average_glucose <= 110:
-            return 0  # Normal - insülin yok
+            return 0  
         elif 111 <= average_glucose <= 150:
-            return 1  # Orta yüksek - 1 ml
+            return 1  
         elif 151 <= average_glucose <= 200:
-            return 2  # Yüksek - 2 ml
+            return 2  
         else:
-            return 3  # Çok yüksek - 3 ml
+            return 3  
     
     def to_dict(self):
         return {

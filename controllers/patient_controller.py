@@ -39,8 +39,7 @@ class PatientController:
     def add_measurement(patient_id, glucose_level, measurement_date, measurement_time, period=None, notes=None):
         """
         Hasta için kan şekeri ölçümü ekler.
-        
-        :return: Ölçüm ID
+
         """
         measurement = Measurement()
         measurement.patient_id = patient_id
@@ -71,8 +70,7 @@ class PatientController:
     def add_exercise_status(patient_id, exercise_type, date, is_completed, notes=None):
         """
         Hasta için egzersiz durumu ekler.
-        
-        :return: Egzersiz ID
+
         """
         exercise = Exercise()
         exercise.patient_id = patient_id
@@ -90,8 +88,7 @@ class PatientController:
     def add_diet_status(patient_id, diet_type, date, is_followed, notes=None):
         """
         Hasta için diyet durumu ekler.
-        
-        :return: Diyet ID
+
         """
         diet = Diet()
         diet.patient_id = patient_id
@@ -109,8 +106,7 @@ class PatientController:
     def add_symptom(patient_id, symptom_type, severity, date, notes=None):
         """
         Hasta için belirti ekler.
-        
-        :return: Belirti ID
+
         """
         symptom = Symptom()
         symptom.patient_id = patient_id
@@ -128,8 +124,7 @@ class PatientController:
     def administer_insulin(insulin_id, administered_dose, notes=None):
         """
         İnsülin uygulama durumunu günceller.
-        
-        :return: Güncellenen insülin ID
+
         """
         # İnsülin kaydını al
         insulin = Insulin()
@@ -146,10 +141,7 @@ class PatientController:
     def get_daily_measurements(patient_id, date=None):
         """
         Hastanın günlük ölçümlerini getirir.
-        
-        :param patient_id: Hasta ID
-        :param date: Tarih (varsayılan: bugün)
-        :return: Ölçüm listesi
+
         """
         if not date:
             date = datetime.now().date()
@@ -160,11 +152,7 @@ class PatientController:
     def get_glucose_average(patient_id, start_date=None, end_date=None):
         """
         Hastanın ortalama kan şekerini hesaplar.
-        
-        :param patient_id: Hasta ID
-        :param start_date: Başlangıç tarihi
-        :param end_date: Bitiş tarihi
-        :return: Ortalama kan şekeri değeri
+
         """
         if not start_date:
             start_date = datetime.now().date() - timedelta(days=7)
@@ -177,10 +165,7 @@ class PatientController:
     def get_insulin_recommendations(patient_id, start_date=None, end_date=None):
         """
         Hastanın insülin önerilerini getirir.
-        
-        :param patient_id: Hasta ID
-        :param start_date: Başlangıç tarihi
-        :param en
+
         """
         if not start_date:
             start_date = datetime.now().date() - timedelta(days=7)
@@ -193,9 +178,7 @@ class PatientController:
     def get_current_recommendations(patient_id):
         """
         Hastanın mevcut durumuna göre öneriler sunar.
-        
-        :param patient_id: Hasta ID
-        :return: Öneri bilgilerini içeren sözlük
+
         """
         # Son ölçümleri ve belirtileri al
         latest_measurements = MeasurementQueries.get_latest_measurements(patient_id, 5)
@@ -227,10 +210,7 @@ class PatientController:
     def _get_recommendations_by_rules(glucose_level, symptoms):
         """
         Kan şekeri ve belirtilere göre diyet ve egzersiz önerilerini belirler.
-        
-        :param glucose_level: Kan şekeri seviyesi
-        :param symptoms: Belirti listesi
-        :return: (diyet_türü, egzersiz_türü) çifti
+
         """
         # Projedeki kurallara göre önerileri belirle
         
@@ -270,11 +250,6 @@ class PatientController:
     def get_measurements_by_date_range(patient_id, start_date, end_date):
         """
         Belirlenen tarih aralığındaki ölçümleri getirir.
-        
-        :param patient_id: Hasta ID
-        :param start_date: Başlangıç tarihi
-        :param end_date: Bitiş tarihi
-        :return: Ölçüm listesi
         """
         return MeasurementQueries.get_measurements_by_date_range(patient_id, start_date, end_date)
     @staticmethod
@@ -282,9 +257,6 @@ class PatientController:
         """
         Hastanın ölçümlerini getirir.
         
-        :param patient_id: Hasta ID
-        :param limit: Maksimum ölçüm sayısı (varsayılan: None, tüm ölçümler)
-        :return: Ölçüm listesi
         """
         measurements = MeasurementQueries.get_measurements_by_patient_id(patient_id)
         if limit and len(measurements) > limit:
@@ -295,9 +267,6 @@ class PatientController:
         """
         Hastanın diyet kayıtlarını getirir.
 
-        :param patient_id: Hasta ID
-        :param limit: Maksimum kayıt sayısı (varsayılan: None, tüm kayıtlar)
-        :return: Diyet kaydı listesi
         """
         diets = DietQueries.get_diets_by_patient_id(patient_id)
         return diets[:limit] if limit and diets else diets
@@ -312,12 +281,6 @@ class PatientController:
     def get_patient_symptoms(patient_id, start_date=None, end_date=None, symptom_type=None):
         """
         Hastanın belirtilerini getirir.
-        
-        :param patient_id: Hasta ID
-        :param start_date: Başlangıç tarihi (opsiyonel)
-        :param end_date: Bitiş tarihi (opsiyonel)
-        :param symptom_type: Belirti türü (opsiyonel)
-        :return: Belirti listesi
         """
         if symptom_type:
             return SymptomQueries.get_symptoms_by_type(patient_id, symptom_type)

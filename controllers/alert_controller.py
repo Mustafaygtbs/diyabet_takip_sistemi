@@ -8,11 +8,6 @@ class AlertController:
     def create_glucose_alert(patient_id, glucose_level, period=None):
         """
         Kan şekeri seviyesine göre uyarı oluşturur.
-        
-        :param patient_id: Hasta ID
-        :param glucose_level: Kan şekeri seviyesi
-        :param period: Ölçüm periyodu (sabah, öğle, vb.)
-        :return: Oluşturulan uyarı ID'si
         """
         alert = Alert()
         alert.patient_id = patient_id
@@ -64,10 +59,6 @@ class AlertController:
     def create_missing_measurement_alert(patient_id, date):
         """
         Eksik ölçüm uyarısı oluşturur.
-        
-        :param patient_id: Hasta ID
-        :param date: Tarih
-        :return: Oluşturulan uyarı ID'si
         """
         alert = Alert()
         alert.patient_id = patient_id
@@ -85,10 +76,6 @@ class AlertController:
     def create_insufficient_measurement_alert(patient_id, date):
         """
         Yetersiz ölçüm uyarısı oluşturur.
-        
-        :param patient_id: Hasta ID
-        :param date: Tarih
-        :return: Oluşturulan uyarı ID'si
         """
         alert = Alert()
         alert.patient_id = patient_id
@@ -106,9 +93,6 @@ class AlertController:
     def mark_alert_as_read(alert_id):
         """
         Uyarıyı okundu olarak işaretler.
-        
-        :param alert_id: Uyarı ID
-        :return: Başarılıysa True, değilse False
         """
         result = AlertQueries.mark_alert_as_read(alert_id)
         return result is not None

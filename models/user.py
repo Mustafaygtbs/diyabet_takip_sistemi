@@ -10,11 +10,11 @@ class User:
         self.password = password
         self.name = name
         self.surname = surname
-        self.birthdate = birthdate  # datetime.date nesnesi
-        self.gender = gender  # 'E' veya 'K'
+        self.birthdate = birthdate  
+        self.gender = gender  
         self.email = email
-        self.profile_image = profile_image  # binary veri
-        self.user_type = user_type  # 'doctor' veya 'patient'
+        self.profile_image = profile_image  
+        self.user_type = user_type  
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
     

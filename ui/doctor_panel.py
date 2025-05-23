@@ -1,4 +1,3 @@
-# ui/doctor_panel.py
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
                             QLabel, QPushButton, QTabWidget, QTableWidget,
                             QTableWidgetItem, QFrame, QSplitter, QComboBox,
@@ -42,7 +41,6 @@ class DoctorPanel(QMainWindow):
         super().__init__()
         self.doctor = doctor
         
-        # Set modern chart style
         mpl.style.use('seaborn-v0_8-whitegrid')
         plt.rcParams['font.family'] = 'Segoe UI'
         plt.rcParams['axes.facecolor'] = '#F8F9FA'
@@ -250,25 +248,37 @@ class DoctorPanel(QMainWindow):
         """)
         
         # Header with title and add patient button
-        list_header = QWidget()
-        list_header_layout = QHBoxLayout()
-        list_header.setLayout(list_header_layout)
-        
+        patients_card = QFrame()
+        patients_card.setStyleSheet("""
+            QFrame {
+                background: #fff;
+                border-radius: 12px;
+                border: 1.5px solid #E0E0E0;
+                box-shadow: 0 2px 8px rgba(60,60,60,0.07);
+                margin-bottom: 12px;
+                padding: 18px 0 10px 0;
+            }
+        """)
+        patients_card_layout = QVBoxLayout()
+        patients_card.setLayout(patients_card_layout)
         patients_label = QLabel("Hastalarım")
         patients_label.setFont(QFont("Segoe UI", 16, QFont.Bold))
-        patients_label.setStyleSheet("color: #3949AB;")
-        
-        # Add patient button
+        patients_label.setStyleSheet("color: #3949AB; margin-bottom: 8px;")
         add_patient_button = QPushButton("Yeni Hasta")
         add_patient_button.setIcon(QIcon("resources/medical-check.png"))
+        add_patient_button.setFixedWidth(120)
+        add_patient_button.setFixedHeight(32)
         add_patient_button.setStyleSheet("""
             QPushButton {
                 background-color: #4CAF50;
                 color: white;
-                border-radius: 5px;
-                padding: 8px 15px;
+                border-radius: 7px;
+                padding: 6px 18px;
                 font-weight: bold;
-                min-height: 36px;
+                font-size: 13px;
+                margin-top: 2px;
+                margin-bottom: 2px;
+                box-shadow: 0 2px 8px rgba(60,60,60,0.07);
             }
             QPushButton:hover {
                 background-color: #43A047;
@@ -278,10 +288,11 @@ class DoctorPanel(QMainWindow):
             }
         """)
         add_patient_button.clicked.connect(self.open_patient_form)
-        
-        list_header_layout.addWidget(patients_label)
-        list_header_layout.addStretch(1)
-        list_header_layout.addWidget(add_patient_button)
+        patients_card_layout.addWidget(patients_label, alignment=Qt.AlignHCenter)
+        patients_card_layout.addWidget(add_patient_button, alignment=Qt.AlignHCenter)
+        patients_card_layout.setSpacing(6)
+        patients_card_layout.setContentsMargins(0, 0, 0, 0)
+        list_header = patients_card
         
         # Search box
         search_layout = QHBoxLayout()
@@ -1394,32 +1405,95 @@ class DoctorPanel(QMainWindow):
         manual_layout = QVBoxLayout()
         manual_recommendation_tab.setLayout(manual_layout)
 
-        # Öneri ekleme formu
-        form_group = QGroupBox("Yeni Manuel Öneri Ekle")
-        form_layout = QHBoxLayout()
-        form_group.setLayout(form_layout)
-
-        type_label = QLabel("Öneri Türü:")
+        # Öneri ekleme formu (modern tasarım)
+        form_card = QFrame()
+        form_card.setStyleSheet("""
+            QFrame {
+        background: #FFFFFF;
+        border-radius: 10px;
+        border: 1px solid #E0E0E0;
+        padding: 20px;
+        margin: 10px 0;
+    }
+        """)
+        form_card_layout = QVBoxLayout()
+        form_card.setLayout(form_card_layout)
+        # Başlık için kapsül/etiket görünümü
+        form_title = QLabel("Yeni Manuel Öneri Ekle")
+        form_title.setFont(QFont("Segoe UI", 14, QFont.Bold))
+        form_title.setStyleSheet("""
+         color: #3949AB;
+          padding: 0 0 10px 0;
+         border: none;
+          background: transparent;
+            """)
+        form_title.setAlignment(Qt.AlignCenter)
+        form_title.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
+        form_card_layout.insertWidget(0, form_title, alignment=Qt.AlignHCenter)
+        # Tür
+        type_label = QLabel("Öneri Türü")
+        type_label.setStyleSheet("font-weight: 500; color: #3949AB; margin-bottom: 2px;")
         type_combo = QComboBox()
         type_combo.addItem("Diyet", "diet")
         type_combo.addItem("Egzersiz", "exercise")
         type_combo.addItem("İnsülin", "insulin")
         type_combo.addItem("Diğer", "other")
-        form_layout.addWidget(type_label)
-        form_layout.addWidget(type_combo)
-
-        content_label = QLabel("İçerik:")
+        type_combo.setStyleSheet("padding: 6px 10px; border-radius: 6px; border: 1px solid #C5CAE9; background: #F8F9FA; font-size: 13px;")
+        form_card_layout.addWidget(type_label)
+        form_card_layout.addWidget(type_combo)
+        # İçerik
+        content_label = QLabel("İçerik")
+        content_label.setStyleSheet("font-weight: 500; color: #3949AB; margin-top: 10px; margin-bottom: 2px;")
         content_edit = QTextEdit()
         content_edit.setPlaceholderText("Öneri metni giriniz...")
-        content_edit.setFixedHeight(60)
-        form_layout.addWidget(content_label)
-        form_layout.addWidget(content_edit)
-
+        content_edit.setFixedHeight(110)
+        content_edit.setReadOnly(False)
+        content_edit.setEnabled(True)
+        content_edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        content_edit.setStyleSheet("""
+            QTextEdit {
+                padding: 5px;
+                border-radius: 6px;
+                border: 1.5px solid #C5CAE9;
+                background: #fff;
+                font-size: 15px;
+                color: #222;
+                line-height: 1.5;
+            }
+            QTextEdit:focus {
+                border: 1.5px solid #3949AB;
+                background: #fff;
+            }
+        """)
+        form_card_layout.addWidget(content_label)
+        form_card_layout.addWidget(content_edit)
+        # Kaydet butonu
         add_button = QPushButton("Kaydet")
-        add_button.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold; border-radius: 5px; padding: 8px 15px;")
-        form_layout.addWidget(add_button)
-
-        manual_layout.addWidget(form_group)
+        add_button.setStyleSheet("""
+            QPushButton {
+                background-color: #3949AB;
+                color: white;
+                font-weight: bold;
+                border-radius: 6px;
+                padding: 8px 0;
+                font-size: 15px;
+                min-width: 120px;
+                min-height: 38px;
+                box-shadow: 0 2px 6px rgba(60,60,60,0.08);
+                letter-spacing: 0.5px;
+            }
+            QPushButton:hover {
+                background-color: #303F9F;
+            }
+            QPushButton:pressed {
+                background-color: #283593;
+            }
+        """)
+        add_button.setFixedWidth(140)
+        add_button.setFixedHeight(38)
+        add_button.setCursor(Qt.PointingHandCursor)
+        form_card_layout.addWidget(add_button, alignment=Qt.AlignRight | Qt.AlignVCenter)
+        manual_layout.insertWidget(0, form_card)
 
         # Geçmiş öneriler tablosu
         table_group = QGroupBox("Geçmiş Manuel Öneriler")
