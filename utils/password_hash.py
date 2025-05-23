@@ -1,4 +1,4 @@
-# utils/password_hash.py
+
 import hashlib
 import os
 import binascii

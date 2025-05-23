@@ -1,4 +1,4 @@
-# controllers/__init__.py
+
 from controllers.auth_controller import AuthController
 from controllers.doctor_controller import DoctorController
 from controllers.patient_controller import PatientController

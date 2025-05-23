@@ -23,12 +23,12 @@ def main():
         
         DataSeeder.seed_database()
         
-        # Giriş ekranını göster
+ 
         login_window = LoginWindow()
         login_window.setWindowIcon(QIcon("resources/medical-check.png"))  
         login_window.show()
         
-        # Uygulamayı çalıştır
+ 
         sys.exit(app.exec_())
         
     except Exception as e:
@@ -36,7 +36,7 @@ def main():
         QMessageBox.critical(None, "Hata", f"Uygulama başlatılırken bir hata oluştu:\n{str(e)}")
         sys.exit(1)
     finally:
-        # Uygulama kapanırken veritabanı bağlantılarını kapat
+ 
         try:
             db = DatabaseConnection.get_instance()
             db.close_all_connections()

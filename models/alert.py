@@ -1,4 +1,3 @@
-# models/alert.py
 from datetime import datetime
 
 class Alert:

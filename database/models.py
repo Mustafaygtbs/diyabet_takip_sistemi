@@ -1,4 +1,4 @@
-# database/models.py
+ 
 import psycopg2
 from database.connection import DatabaseConnection
 

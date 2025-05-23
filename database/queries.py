@@ -1,4 +1,4 @@
-# database/queries.py
+ 
 from database.connection import DatabaseConnection
 
 class UserQueries:

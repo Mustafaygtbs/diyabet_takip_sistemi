@@ -1,4 +1,4 @@
-# database/seeder.py
+ 
 from datetime import date
 from models.doctor import Doctor
 from controllers.auth_controller import AuthController

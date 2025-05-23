@@ -1,4 +1,4 @@
-# ui/widgets/exercise_chart.py
+
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QLabel, QHBoxLayout
 from PyQt5.QtCore import Qt
 

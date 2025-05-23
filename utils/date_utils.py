@@ -1,4 +1,4 @@
-# utils/date_utils.py
+
 from datetime import datetime, date, time, timedelta
 
 class DateUtils:
@@ -6,9 +6,7 @@ class DateUtils:
     def format_date(date_obj):
         """
         datetime.date nesnesini Türkiye formatında string'e dönüştürür (DD.MM.YYYY).
-        
-        :param date_obj: datetime.date nesnesi
-        :return: Formatlanmış tarih string'i
+
         """
         if not date_obj:
             return ""
@@ -19,9 +17,7 @@ class DateUtils:
     def format_time(time_obj):
         """
         datetime.time nesnesini Türkiye formatında string'e dönüştürür (HH:MM:SS).
-        
-        :param time_obj: datetime.time nesnesi
-        :return: Formatlanmış saat string'i
+
         """
         if not time_obj:
             return ""
@@ -32,9 +28,7 @@ class DateUtils:
     def format_datetime(datetime_obj):
         """
         datetime.datetime nesnesini Türkiye formatında string'e dönüştürür (DD.MM.YYYY HH:MM:SS).
-        
-        :param datetime_obj: datetime.datetime nesnesi
-        :return: Formatlanmış tarih ve saat string'i
+
         """
         if not datetime_obj:
             return ""
@@ -46,8 +40,7 @@ class DateUtils:
         """
         Türkiye formatındaki tarih string'ini datetime.date nesnesine dönüştürür.
         
-        :param date_str: DD.MM.YYYY formatında tarih string'i
-        :return: datetime.date nesnesi veya None
+ 
         """
         if not date_str:
             return None
@@ -61,9 +54,7 @@ class DateUtils:
     def parse_time(time_str):
         """
         Türkiye formatındaki saat string'ini datetime.time nesnesine dönüştürür.
-        
-        :param time_str: HH:MM:SS formatında saat string'i
-        :return: datetime.time nesnesi veya None
+
         """
         if not time_str:
             return None
@@ -82,8 +73,6 @@ class DateUtils:
         """
         Türkiye formatındaki tarih ve saat string'ini datetime.datetime nesnesine dönüştürür.
         
-        :param datetime_str: DD.MM.YYYY HH:MM:SS formatında tarih ve saat string'i
-        :return: datetime.datetime nesnesi veya None
         """
         if not datetime_str:
             return None
@@ -102,8 +91,6 @@ class DateUtils:
         """
         Verilen tarihin bulunduğu haftanın başlangıç ve bitiş tarihlerini döndürür.
         
-        :param date_obj: datetime.date nesnesi (varsayılan: bugün)
-        :return: (hafta_başı, hafta_sonu) tuple'ı
         """
         if not date_obj:
             date_obj = date.today()
@@ -120,8 +107,6 @@ class DateUtils:
         """
         Verilen tarihin bulunduğu ayın başlangıç ve bitiş tarihlerini döndürür.
         
-        :param date_obj: datetime.date nesnesi (varsayılan: bugün)
-        :return: (ay_başı, ay_sonu) tuple'ı
         """
         if not date_obj:
             date_obj = date.today()

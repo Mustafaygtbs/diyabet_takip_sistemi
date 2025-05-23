@@ -1,4 +1,4 @@
-# ui/widgets/alert_widget.py
+
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
 from PyQt5.QtGui import QIcon, QFont, QColor
 from PyQt5.QtCore import Qt, pyqtSignal

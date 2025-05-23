@@ -1,4 +1,4 @@
-# controllers/auth_controller.py
+
 import hashlib
 import os
 import binascii

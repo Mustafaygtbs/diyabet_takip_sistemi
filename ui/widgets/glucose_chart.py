@@ -1,4 +1,4 @@
-# ui/widgets/glucose_chart.py
+
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtCore import Qt

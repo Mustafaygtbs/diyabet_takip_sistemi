@@ -1,4 +1,4 @@
-# controllers/alert_controller.py
+
 from datetime import datetime
 from models.alert import Alert
 from database.queries import AlertQueries
